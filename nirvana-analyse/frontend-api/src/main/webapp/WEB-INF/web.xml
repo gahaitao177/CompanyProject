@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="FinanceApp_ID" version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    <listener>
+        <listener-class>com.rbc.frame.RbcFrameListener</listener-class>
+    </listener>
+    <servlet>
+        <servlet-name>rbc-action</servlet-name>
+        <servlet-class>com.rbc.frame.core.ActionServlet</servlet-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value></param-value>
+        </init-param>
+        <init-param>
+            <param-name>contenttype</param-name>
+            <param-value>text/json; charset=UTF-8</param-value>
+        </init-param>
+        <init-param>
+            <param-name>keywords</param-name>
+            <param-value>like,insert,create</param-value>
+        </init-param>
+
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>rbc-action</servlet-name>
+        <url-pattern>*.go</url-pattern>
+    </servlet-mapping>
+    <filter>
+        <filter-name>Encoding</filter-name>
+        <filter-class>com.rbc.frame.core.EncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>Encoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+</web-app>

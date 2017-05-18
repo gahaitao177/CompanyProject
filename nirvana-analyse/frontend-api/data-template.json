@@ -1,0 +1,36 @@
+{
+  "appKey": "iamkey",
+  "deviceId": "android123",
+  "deviceType": 0,
+  "deviceOs": "6.0",
+  "deviceModel": "m1",
+  "deviceBrand": "xm",
+  "appVersion": "1.0.0",
+  "appName": "有鱼记账",
+  "appSource": 10001,
+  "appInstallPkgSource": 10002,
+  "appChanne": "百度",
+  "appNetWork": "2g",
+  "appGps": "lng,lat",
+  "userId": "",
+  "userName": "",
+  "events": [
+    {
+      "eventId": "tab_account",
+      "time": 1482740597460,
+      "extra": "1"
+    },
+    {
+      "id": "tab_form",
+      "time": 1482740597460,
+      "extra": "2"
+    }
+  ],
+  "histories": [
+    {
+      "page": "MainActivity",
+      "enterTime": 1482740597460,
+      "exitTime": 1482740597999
+    }
+  ]
+}

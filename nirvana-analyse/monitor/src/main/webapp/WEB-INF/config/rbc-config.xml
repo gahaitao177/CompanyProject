@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rbc-config userName="admin" passWord="admin">
+    <action-modules>
+        <module name="monitor" file="monitor_action.xml"/>
+    </action-modules>
+</rbc-config>

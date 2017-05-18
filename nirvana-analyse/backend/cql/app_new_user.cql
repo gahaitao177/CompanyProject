@@ -1,0 +1,25 @@
+--存放每小时新增的用户信息
+CREATE TABLE app_new_user (
+	device_id text,
+	app_key text,
+	app_name text,
+    app_source text,
+	app_network text,
+	app_version text,
+	city text,
+    city_code text,
+	device_model text,
+	device_os text,
+	device_type text,
+	app_gps text,
+    device_brand text,
+	device_res text,
+	app_channel text,
+	province text,
+	user_id text,
+	user_name text,
+	app_ip text,
+	ctime timestamp,
+    enter_time timestamp,
+	PRIMARY KEY (device_id)
+);

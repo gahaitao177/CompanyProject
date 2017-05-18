@@ -1,0 +1,31 @@
+{
+  "deviceModel" : "iPod touch",
+  "appName" : "YYAnalytics_Example",
+  "appSource" : "test source",
+  "userId" : "",
+  "histories" : [
+
+  ],
+  "appGps" : "",
+  "appVersion" : "1.0",
+  "deviceOs" : "9.3.2",
+  "appChannel" : "test channel",
+  "userName" : "",
+  "events" : [
+    {
+      "time" : "1487148818177",
+      "extra" : "",
+      "eventId" : "0"
+    },
+    {
+      "time" : "1487212072422",
+      "extra" : "",
+      "eventId" : "27"
+    }
+  ],
+  "deviceId" : "C9D1A933-04E9-42CA-B7FA-64480E9BC79B",
+  "deviceType" : "1",
+  "deviceRes" : "640 * 1136",
+  "appKey" : "test key",
+  "appNetWork" : ""
+}

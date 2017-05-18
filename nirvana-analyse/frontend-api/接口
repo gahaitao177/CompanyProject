@@ -1,0 +1,7 @@
+接口
+1 测试环境
+	http://192.168.1.51:10018/nirvana/demo.go ——>测试上传tomcat是否working 
+	http://192.168.1.51:10018/nirvana/uploadFile.go ----->文件上传接口
+2 正式环境
+    https://financial.youyuwo.com/nirvana/demo.go -------> test
+    https://financial.youyuwo.com/nirvana/uploadFile.go -----> upload

@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one or more
+ contributor license agreements.  See the NOTICE file distributed with
+ this work for additional information regarding copyright ownership.
+ The ASF licenses this file to You under the Apache License, Version 2.0
+ (the "License"); you may not use this file except in compliance with
+ the License.  You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<configuration monitorInterval="60">
+    <properties>
+        <!-- <property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} %c %msg%n</property>  -->
+        <property name="pattern">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] -%p %c %msg%n</property>
+        <property name="patternNoTime">%msg%n</property>
+    </properties>
+    <appenders>
+        <RollingFile name="A1"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="bank"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/bankService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="push"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/pushService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="email"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/emailService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="accountbook"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/accountBookService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <!--
+        <RollingFile name="pub"
+        fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/pubService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+          <PatternLayout>
+            <pattern>${pattern}</pattern>
+          </PatternLayout>
+          <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+
+          </Policies>
+          <DefaultRolloverStrategy max="9"/>
+        </RollingFile>-->
+        <RollingFile name="STDOUT"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.out"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.out.%i.gz">
+            <PatternLayout>
+                <pattern>${patternNoTime}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="4"/>
+        </RollingFile>
+        <RollingFile name="STDERR"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.err"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.err.%i.gz">
+            <PatternLayout>
+                <pattern>${patternNoTime}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="4"/>
+        </RollingFile>
+        <RollingFile name="pub"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/pubService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+                <!-- Or every 100 MB -->
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="gjj"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/gjjService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="shebao"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/shebaoService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="common"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/commonService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="loan"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/loanService.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="nirvanaCore"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvanaCore.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="nirvanaCcardCcardinfo"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvanaCcardCcardinfo.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskBillBank"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskBillBank.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskBillMail"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskBillMail.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskUser"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskUser.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_lend_servicer"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_lend_servicer.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+
+        <RollingFile name="nirvana_hskCardMaterial"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskCardMaterial.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskCcard"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskCcard.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskCcardInfo"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskCcardInfo.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskCInvestigation"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskCInvestigation.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+
+        <RollingFile name="nirvana_hskLoan"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskLoan.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <RollingFile name="nirvana_hskTool"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nirvana_hskTool.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="nivana_data_up"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/nivana_data_up.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+        <RollingFile name="drpc-test"
+                     fileName="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/drpc-test.log"
+                     filePattern="${sys:workers.artifacts}/${sys:storm.id}/${sys:worker.port}/${sys:logfile.name}.%i.gz">
+            <PatternLayout>
+                <pattern>${pattern}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="9"/>
+        </RollingFile>
+
+        <Syslog name="syslog" format="RFC5424" host="localhost" port="514" protocol="UDP"
+                appName="[${sys:storm.id}:${sys:worker.port}]" mdcId="mdc" includeMDC="true" facility="LOCAL5"
+                enterpriseNumber="18060" newLine="true" exceptionPattern="%rEx{full}"
+                messageId="[${sys:user.name}:${sys:logging.sensitivity}]" id="storm"/>
+        <Socket name="Logstash" host="192.168.83.37" port="4560" protocol="TCP">
+            <PatternLayout pattern="${pattern}"/>
+        </Socket>
+    </appenders>
+    <loggers>
+        <root level="WARN">
+            <!-- We log everything -->
+            <appender-ref ref="A1"/>
+            <appender-ref ref="syslog"/>
+            <appender-ref ref="Logstash"/>
+        </root>
+        <Logger name="org.apache.storm" level="WARN">
+            <appender-ref ref="A1"/>
+            <appender-ref ref="syslog"/>
+        </Logger>
+        <Logger name="STDERR" level="WARN">
+            <appender-ref ref="STDERR"/>
+            <appender-ref ref="syslog"/>
+        </Logger>
+        <Logger name="STDOUT" level="WARN">
+            <appender-ref ref="STDOUT"/>
+            <appender-ref ref="syslog"/>
+        </Logger>
+        <Logger name="io.been.storm" level="WARN">
+            <appender-ref ref="A1"/>
+        </Logger>
+        <Logger name="storm.kafka" level="WARN">
+            <appender-ref ref="A1"/>
+        </Logger>
+        <Logger name="org.apache" level="WARN">
+            <appender-ref ref="A1"/>
+        </Logger>
+        <Logger name="kafka.producer" level="WARN">
+            <appender-ref ref="A1"/>
+        </Logger>
+        <Logger name="com.caiyi.hsk.bank" level="INFO">
+            <appender-ref ref="bank"/>
+        </Logger>
+        <Logger name="com.caiyi.hsk.push" level="INFO">
+            <appender-ref ref="push"/>
+        </Logger>
+        <Logger name="com.caiyi.hsk.email" level="INFO">
+            <appender-ref ref="email"/>
+        </Logger>
+        <Logger name="com.caiyi.hsk.loan" level="INFO">
+            <appender-ref ref="loan"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.tools.gjj" level="INFO">
+            <appender-ref ref="gjj"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.tools.shebao" level="INFO">
+            <appender-ref ref="shebao"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.tools.pub" level="INFO">
+            <appender-ref ref="pub"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.tools.common" level="INFO">
+            <appender-ref ref="common"/>
+        </Logger>
+
+        <Logger name="com.caiyi.accountbook" level="INFO">
+            <appender-ref ref="accountbook"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.nirvana.core" level="INFO">
+            <appender-ref ref="nirvanaCore"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.nirvana.ccard.ccardinfo" level="INFO">
+            <appender-ref ref="nirvanaCcardCcardinfo"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.bill.bank" level="INFO">
+            <appender-ref ref="nirvana_hskBillBank"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.bill.mail" level="INFO">
+            <appender-ref ref="nirvana_hskBillMail"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.nirvana.discount.user" level="INFO">
+            <appender-ref ref="nirvana_hskUser"/>
+        </Logger>
+        <Logger name="com.caiyi.hsk.lend" level="INFO">
+            <appender-ref ref="nirvana_lend_servicer"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.material" level="INFO">
+            <appender-ref ref="nirvana_hskCardMaterial"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.discount.ccard" level="INFO">
+            <appender-ref ref="nirvana_hskCcard"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.ccardinfo" level="INFO">
+            <appender-ref ref="nirvana_hskCcardInfo"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.investigation" level="INFO">
+            <appender-ref ref="nirvana_hskCInvestigation"/>
+        </Logger>
+
+        <Logger name="com.caiyi.financial.nirvana.ccard.loan" level="INFO">
+            <appender-ref ref="nirvana_hskLoan"/>
+        </Logger>
+        <Logger name="com.caiyi.financial.nirvana.discount.tools" level="INFO">
+            <appender-ref ref="nirvana_hskTool"/>
+        </Logger>
+        <Logger name="com.caiyi.nirvana.analyse.akka" level="INFO">
+            <appender-ref ref="nivana_data_up"/>
+        </Logger>
+        <Logger name="com.caiyi.nirvana.analyse.test" level="INFO">
+            <appender-ref ref="drpc-test"/>
+        </Logger>
+    </loggers>
+</configuration>

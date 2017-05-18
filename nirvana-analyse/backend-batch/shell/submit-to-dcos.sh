@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+dcos spark run --submit-args='-Dspark.mesos.coarse=true --driver-cores 0.2 --driver-memory 100M --class com.caiyi.nirvana.analyse.demo.JavaSparkPi http://192.168.1.54:8081/nexus/content/repositories/releases/com/caiyi/nirvana/analyse-backend-batch/1.0/analyse-backend-batch-1.0.jar 1 dcos'

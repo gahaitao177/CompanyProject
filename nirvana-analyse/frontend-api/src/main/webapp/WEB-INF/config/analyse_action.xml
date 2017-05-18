@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rbc-config>
+    <action-mappings>
+        <action name="uploadFile" bean="com.caiyi.nirvana.analyse.user.UserBean" scope="request" desc="upload">
+            <execute method="uploadFiles"/>
+        </action>
+        <action name="demo" bean="com.caiyi.nirvana.analyse.user.UserBean" scope="request" desc="test">
+            <execute method="test"/>
+        </action>
+    </action-mappings>
+</rbc-config>

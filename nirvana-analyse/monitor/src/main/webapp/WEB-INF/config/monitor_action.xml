@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<rbc-config>
+    <action-mappings>
+        <action name="probe" bean="com.caiyi.nirvana.analyse.monitor.bean.DemoBean" scope="request" desc="test">
+            <execute method="test"/>
+        </action>
+        <action name="enable" bean="com.caiyi.nirvana.analyse.monitor.bean.SystemCodeBean" scope="request" desc="test">
+            <execute method="change"/>
+        </action>
+    </action-mappings>
+</rbc-config>
