@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.bill.mail.mapper.MailMapper">
+    <select id="select" resultType="map" parameterType="com.caiyi.financial.nirvana.ccard.bill.bean.MailBill">
+	select tu.cuserid from tb_user tu where tu.cuserid =#{cuserId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getMailBillByBillId"  resultType="com.caiyi.financial.nirvana.ccard.bill.dto.MailBillDto" >
+        select icreditid,ioutsideid,ibillid,iskeep,cexpiredate,ibankid,cname from tb_bank_bill where ibillid=#{0,jdbcType=INTEGER} and cuserid=#{1,jdbcType=VARCHAR} and iswebormail=1
+    </select>
+
+    <update id="updateOnlyDate" >
+      update tb_bank_bill tbb  set tbb.cupdate = sysdate where ibillid=#{0,jdbcType=INTEGER} and cuserid=#{1,jdbcType=VARCHAR} and iswebormail=1
+    </update>
+</mapper>

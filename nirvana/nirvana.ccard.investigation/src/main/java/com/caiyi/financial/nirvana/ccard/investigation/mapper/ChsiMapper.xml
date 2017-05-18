@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.investigation.mapper.ChsiMapper">
+
+    <insert id="addChsiAccount" parameterType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiAccountDto">
+        <selectKey resultType="int" keyProperty="chsiAccountId" order="BEFORE">
+            select SEQ_XX_CREDIT_ACCOUNT_ID.nextval as chsiAccountId from dual
+        </selectKey>
+        insert into tb_xx_credit_account
+        (ica_id,cca_login_name, cca_login_pwd, cca_phone,cca_add_time, cca_update_time,
+        cca_mail,cca_id_code,cca_userid, ica_state,ica_education_level)
+        values(
+        #{chsiAccountId,jdbcType = INTEGER},
+        #{loginName, jdbcType = VARCHAR},
+        #{loginPwd, jdbcType = VARCHAR},
+        #{phone,jdbcType = VARCHAR},
+        #{addTime, jdbcType = DATE},
+        #{updateTime, jdbcType = DATE},
+        #{mail,jdbcType = VARCHAR},
+        #{idCode,jdbcType = VARCHAR},
+        #{userId, jdbcType = VARCHAR},
+        #{state, jdbcType = INTEGER},
+        #{educationLevel,jdbcType = INTEGER}
+        )
+    </insert>
+
+    <insert id="addChsiEducationList"
+            parameterType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiEducationDto">
+        insert into tb_xx_credit_education
+        select SEQ_XX_CREDIT_EDUCATION_ID.nextval,a.* from (
+        <foreach collection="degrees" item="i" separator="union all" index="index">
+            select
+            #{i.chsiAccountId, jdbcType = INTEGER} ica_id,
+            #{i.name, jdbcType = VARCHAR} cce_name,
+            to_date(#{i.birthday, jdbcType = DATE},'yyyy-mm-dd hh24:mi:ss') cce_birthday,
+            #{i.sex, jdbcType = INTEGER} ice_sex,
+            #{i.nation, jdbcType = VARCHAR} cce_nation,
+            #{i.code, jdbcType = VARCHAR} cce_code,
+            #{i.college, jdbcType = VARCHAR} cce_collge,
+            #{i.levels, jdbcType = VARCHAR} cce_level,
+            #{i.major, jdbcType = VARCHAR} cce_major,
+            #{i.schooling, jdbcType = DOUBLE} ice_schooling,
+            #{i.schoolingType, jdbcType = VARCHAR} cce_schooling_type,
+            #{i.learnForm, jdbcType = VARCHAR} cce_learn_form,
+            #{i.department, jdbcType = VARCHAR} cce_department,
+            #{i.place, jdbcType = VARCHAR} cce_place,
+            #{i.iClass, jdbcType = VARCHAR} cce_class,
+            #{i.studentNo, jdbcType = VARCHAR} cce_student_number,
+            to_date(#{i.joinTime, jdbcType = DATE},'yyyy-mm-dd hh24:mi:ss') cce_join_time,
+            to_date(#{i.graduate, jdbcType = DATE},'yyyy-mm-dd hh24:mi:ss') cce_graduate,
+            #{i.state, jdbcType = INTEGER} ice_state,
+            #{i.stateDetail,jdbcType = VARCHAR} cce_state_detail
+            from dual
+        </foreach>
+        ) a
+    </insert>
+
+    <select id="queryChsiAccount" parameterType="string"
+            resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiAccountDto">
+        select ca.ica_id chsiAccountId,
+        ca.cca_login_name loginName,
+        ca.cca_login_pwd loginPwd,
+        ca.cca_phone phone,
+        ca.cca_add_time addTime,
+        ca.cca_update_time updateTime,
+        ca.cca_mail mail,
+        ca.cca_id_code idCode,
+        ca.cca_userid userId,
+        ca.ica_state state,
+        ca.ica_education_level educationLevel
+        from tb_xx_credit_account ca
+        where ca.cca_userid = #{cuserId, jdbcType = VARCHAR}
+        and ca.ica_state = 1
+    </select>
+
+    <select id="queryChsiEducationList"
+            resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiEducationDto">
+        select ice_id chsiEductionId,
+        ica_id chsiAccountId,
+        cce_name name,
+        cce_birthday birthday,
+        ice_sex sex,
+        cce_nation nation,
+        cce_code code,
+        cce_collge college,
+        cce_level levels,
+        cce_major major,
+        ice_schooling schooling,
+        cce_schooling_type schoolingType,
+        cce_learn_form learnForm,
+        cce_department department,
+        cce_place place,
+        cce_class iClass,
+        cce_student_number studentNo,
+        cce_join_time joinTime,
+        cce_graduate graduate,
+        ice_state state,
+        cce_state_detail stateDetail
+        from tb_xx_credit_education
+        where ica_id = #{chsiAccountId,jdbcType=INTEGER} order by cce_join_time desc
+    </select>
+
+    <update id="updateChsiAccount" parameterType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiAccountDto">
+        update tb_xx_credit_account
+        set ica_id = #{chsiAccountId,jdbcType = INTEGER},
+        cca_login_name = #{loginName,jdbcType = VARCHAR},
+        cca_login_pwd = #{loginPwd,jdbcType = VARCHAR},
+        cca_phone = #{phone,jdbcType = VARCHAR},
+        cca_add_time = #{addTime,jdbcType = DATE},
+        cca_update_time = #{updateTime,jdbcType = DATE},
+        cca_mail = #{mail,jdbcType = VARCHAR},
+        cca_id_code = #{idCode,jdbcType = VARCHAR},
+        cca_userid = #{userId,jdbcType = VARCHAR},
+        ica_state = #{state,jdbcType = INTEGER},
+        ica_education_level = #{educationLevel,jdbcType = INTEGER}
+        where ica_id = #{chsiAccountId, jdbcType = INTEGER}
+    </update>
+
+    <update id="updateChsiEducation"
+            parameterType="com.caiyi.financial.nirvana.ccard.investigation.dto.ChsiEducationDto">
+        update tb_xx_credit_education set
+        ica_id=#{chsiAccountId,jdbcType=INTEGER},
+        cce_name=#{name,jdbcType=VARCHAR},
+        cce_birthday=#{birthday,jdbcType=DATE},
+        ice_sex=#{sex,jdbcType=INTEGER},
+        cce_nation=#{nation,jdbcType=VARCHAR},
+        cce_code=#{code,jdbcType=VARCHAR},
+        cce_collge=#{college,jdbcType=VARCHAR},
+        cce_level=#{levels,jdbcType=VARCHAR},
+        cce_major=#{major,jdbcType=VARCHAR},
+        ice_schooling=#{schooling,jdbcType=DOUBLE},
+        cce_schooling_type=#{schoolingType,jdbcType=VARCHAR},
+        cce_learn_form=#{learnForm,jdbcType=VARCHAR},
+        cce_department=#{department,jdbcType=VARCHAR},
+        cce_place=#{place,jdbcType=VARCHAR},
+        cce_class=#{iClass,jdbcType=VARCHAR},
+        cce_student_number=#{studentNo,jdbcType=VARCHAR},
+        cce_join_time=#{joinTime,jdbcType=DATE},
+        cce_graduate=#{graduate,jdbcType=DATE},
+        ice_state=#{state,jdbcType = INTEGER},
+        cce_state_detail=#{stateDetail,jdbcType = VARCHAR}
+        where ice_id=#{chsiEductionId,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteChsiEducation">
+        delete from tb_xx_credit_education
+        where ica_id = #{chsiAccountId, jdbcType = INTEGER}
+    </delete>
+
+</mapper>

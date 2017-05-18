@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.tools.mapper.ToolMapper">
+
+    <select id="queryQualitySpread" resultType="map" parameterType="string">
+
+        select ctitle "appname",ciconurl "applogo",ccontent "appdesc",ctarget "appurl" from
+        tb_tool_spread where ctoolid='0001'
+        <choose>
+            <when test="typeid!=null and typeid==1">
+                and itype = 1
+            </when>
+            <otherwise>
+                and (itype = 0 or itype is null)
+            </otherwise>
+        </choose>
+        <!--<if test="typeid!='1'">-->
+            <!--and (itype = 2 or itype is null)-->
+        <!--</if>-->
+        <!--<if test="typeid='1'">-->
+            <!--and itype = 1-->
+        <!--</if>-->
+    </select>
+    <update id="updateBookInfo" parameterMap="updateBookInfoPara">
+        update tb_decoration_bill set bookname = ?,bookcolor = ?,updateTime=?,budget = ?,
+        exparam01= ?,exparam02 = ?,isdelete = ?,cupdate=sysdate where updatetime &lt; ?
+        and  cuserid = ? and bookid = ?
+    </update>
+    <parameterMap id="updateBookInfoPara" type="java.util.Map">
+        <parameter property="bookname" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="bookcolor" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="budget" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="bookid" mode="IN" jdbcType="VARCHAR"/>
+    </parameterMap>
+    <insert id="saveBookInfo" parameterMap="saveBookInfoPara">
+    insert into tb_decoration_bill (bookId,cuserid,bookname,
+    bookcolor,updateTime,budget,exparam01,exparam02,isdelete) values(?,?,?,?,?,?,?,?,?)
+    </insert>
+    <parameterMap id="saveBookInfoPara" type="java.util.Map">
+        <parameter property="bookid" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="bookname" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="bookcolor" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="budget" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+        <update id="updateRecordInfo" parameterMap="updateRecordInfoPara">
+            update tb_decoration_record set bookid =?, categoryid = ? ,subcategoryid=?,expenditure=?,
+            remark=?,updateTime=?,isdelete=?,exparam01=?,exparam02=?,exparam03=?,exparam04 =?,cupdate=sysdate
+            where updatetime &lt; ? and cuserid=? and irecordid= ?
+        </update>
+        <parameterMap id="updateRecordInfoPara" type="java.util.Map">
+            <parameter property="bookid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="categoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="subcategoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="expenditure" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="remark" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam03" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam04" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updatetime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="irecordid" mode="IN" jdbcType="VARCHAR"/>
+        </parameterMap>
+
+        <insert id="saveRecordInfo" parameterMap="saveRecordInfoPara">
+            insert into tb_decoration_record (irecordid,bookid,categoryid,subcategoryid,cuserid,
+            updateTime,expenditure,remark,isdelete,exparam01,exparam02,exparam03,exparam04)
+            values(?,?,?,?,?,?,?,?,?,?,?,?,?)
+        </insert>
+        <parameterMap id="saveRecordInfoPara" type="java.util.Map">
+            <parameter property="irecordid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="bookid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="categoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="subcategoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="expenditure" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="remark" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam03" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam04" mode="IN" jdbcType="VARCHAR"/>
+        </parameterMap>
+        <update id="updateCategoryInfo" parameterMap="updateCategoryInfoPara">
+            update tb_decoration_category tdc set categoryid = ?,name=?,
+            updateTime=?,isdelete=?,exparam01 =?,exparam02=? where updatetime &lt; ?
+            and subcategoryid=? and cuserid= ?
+        </update>
+        <parameterMap id="updateCategoryInfoPara" type="java.util.Map">
+            <parameter property="categoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="name" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updatetime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="subcategoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+        </parameterMap>
+        <insert id="saveCategoryInfo" parameterMap="saveCategoryInfoPara">
+           insert into tb_decoration_category (categoryid,subcategoryid,
+           cuserid,name,updateTime,exparam01,exparam02,isdelete) values(?,?,?,?,?,?,?,?)
+        </insert>
+        <parameterMap id="saveCategoryInfoPara" type="java.util.Map">
+            <parameter property="categoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="subcategoryid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="cuserid" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="name" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="updateTime" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam01" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="exparam02" mode="IN" jdbcType="VARCHAR"/>
+            <parameter property="isdelete" mode="IN" jdbcType="VARCHAR"/>
+        </parameterMap>
+</mapper>

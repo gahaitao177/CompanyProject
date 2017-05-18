@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.ccardinfo.mapper.CardMapper">
+    <select id="quryCardCity" resultType="map" parameterType="map">
+     select tbc.ibankid, tb.cbankname,tcbs.iorder,tcbs.hotdeal,tb.icooperation
+        from tb_bank_card tbc,
+        tb_bank tb, tb_city_bank tcb, tb_card_bank_sort tcbs
+        where tbc.ibankid =  tb.ibankid
+        and tcbs.ibankid = tcb.ibankid
+        and tcb.ibankid = tbc.ibankid
+        and (tcb.iareaid = #{cityid,jdbcType=VARCHAR} or tcb.iareaid = -1)
+        <if test="ifFilterIos == 1">
+            and tb.ibankid not in (select thc.ibankid from tb_handle_credit thc where thc.itype = 1)
+        </if>
+        and tbc.istate =1
+        and tb.icooperation >= #{icooperation,jdbcType=VARCHAR}
+        group by tbc.ibankid,
+        tb.cbankname,tcbs.iorder,tcbs.hotdeal,tb.icooperation
+        order by tb.icooperation desc,tcbs.iorder desc,tbc.ibankid
+    </select>
+
+    <select id="queryArticleCount" resultType="map" parameterType="map">
+        select * from (
+        select twp.iitemid , twp.ctitle, twp.csubtitle, twp.cpicurl, tc.caccessulr from tb_swipe_page twp, tb_contact tc
+        where twp.iitemid = tc.icontactid and tc.itype = 0 and tc.ipublished =1 and
+        twp.itype = 2 and twp.idel = 0 order by twp.iorder desc nulls last ) t where rownum &lt; = 3
+    </select>
+    <!--新的，根据合作级别查询银行列表-->
+    <select id="queryCityCardInfo" resultType="map" parameterType="string">
+       select * from (select tbc.icardid, tbc.ccardimg, tbc.ccardname, tbc.iapplicationnum,
+		tbc.ccardgain,tbc.iorder,tbc.ctag from tb_bank_card tbc, tb_city_bank tcb,
+		tb_bank tb
+		where tbc.ibankid = tb.ibankid
+		and tcb.ibankid = tbc.ibankid
+		and (tcb.iareaid = #{cityid,jdbcType=VARCHAR} or tcb.iareaid = -1)
+        <if test="ifFilterIos == 1">
+            and tb.ibankid not in (select thc.ibankid from tb_handle_credit thc where thc.itype = 1)
+        </if>
+		and tbc.ishot =1
+		and tbc.istate =1
+		group by tbc.icardid, tbc.ccardname
+		,tbc.ccardimg,tbc.iapplicationnum,tbc.ccardgain,tbc.iorder,tbc.ctag order by
+		tbc.iorder desc,tbc.iapplicationnum desc,tbc.icardid desc ) t1 where rownum &lt;= 10
+    </select>
+
+    <select id="queryCardFocusInfo" resultType="map" parameterType="string">
+        	select tbc.icardid,
+		       tbc.ccardimg,
+		       tbc.ccardname,
+		       tbc.iapplicationnum,
+		       tbc.ccardgain,
+		       tbc.iorder
+		  from tb_user tu, tb_user_collection tuc, tb_bank_card tbc
+		 where tu.cuserid = tuc.cuserid
+		   and tbc.icardid = tuc.istoreid
+		   and tuc.cuserid = #{cuserid,jdbcType=VARCHAR}
+		   and tuc.idel = 0
+		   and tuc.iexpire = 0
+		   and tuc.itype = 2
+		   and tbc.istate =1
+		   order by tbc.iorder desc,tbc.iapplicationnum desc,tbc.icardid desc
+
+    </select>
+    <select id="queryWechatMsg" parameterType="map" resultType="map">
+      SELECT * from (
+        select t1.icityid "icityid",t1.ibankid "ibankid",t2.imsgid "imsgid", t2.copenid "copenid",t2.cpicurl "cpicurl",t2.ctitle "ctitle",
+        t2.curl "curl", t2.cpubdate "cpubdate",t2.cmodifydate "cmodifydate",t2.cadddate "cadddate",t2.istate "istate",t2.icollectnum "icollectnum",
+        t2.ipraisenum "ipraisenum",t2.iread "iread",t3.cbankname "cbankname" from
+		(select copenid,icityid,ibankid from TB_BANK_WECHAT where istate!=4 and istate!=1)t1 ,
+		(select * from TB_BANK_WECHAT_MSG where istate!=4)t2 ,(select ibankid,cbankname from tb_bank) t3
+		where t1.copenid=t2.copenid and t1.ibankid=t3.ibankid
+        <if test="bankids!=null">
+            and t1.ibankid in (
+            <foreach collection="bankids" index="index" item="item" separator="," >
+                #{item}
+            </foreach>
+            )
+        </if>
+        <if test="citys!=null">
+            and t1.icityid in (
+            <foreach collection="citys" index="index" item="item" separator=",">
+                #{item}
+            </foreach>
+            )
+        </if>
+         order by cpubdate desc, imsgid
+
+        ) tt  where rownum &lt;= 1
+    </select>
+
+    <!--查询是否是收藏-->
+    <select id="queryCollectScoll">
+        select count(1)
+        from tb_user_collection
+        where itype = 9
+        and istoreid = #{imsgid,jdbcType=VARCHAR}
+        and cuserid = #{cuserid,jdbcType=VARCHAR}
+    </select>
+
+    <!--查询是否被点赞-->
+    <select id="querySpraise">
+        select count(1)
+        from tb_user_praise
+        where itype = 9
+        and istoreid = #{imsgid,jdbcType=VARCHAR}
+        and cuserid = #{cuserid,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryCityCardOld" resultType="map" parameterType="string">
+       SELECT * from ( select tbc.ibankid, tb.cbankname,tcbs.iorder,tcbs.hotdeal,tb.icooperation
+        from tb_bank_card tbc,
+        tb_bank tb, tb_city_bank tcb, tb_card_bank_sort tcbs
+        where tbc.ibankid =  tb.ibankid
+        and tcbs.ibankid = tcb.ibankid
+        and tcb.ibankid = tbc.ibankid
+        and (tcb.iareaid = #{cityid,jdbcType=VARCHAR} or tcb.iareaid = -1)
+        <if test="ifFilterIos == 1">
+            and tb.ibankid not in (select thc.ibankid from tb_handle_credit thc where thc.itype = 1)
+        </if>
+        and tbc.istate =1
+        group by tbc.ibankid,
+        tb.cbankname,tcbs.iorder,tcbs.hotdeal,tb.icooperation
+        order by tb.icooperation desc,tcbs.iorder desc,tbc.ibankid ) where rownum &lt;= 100
+
+    </select>
+    <select id="filterCardInfo" parameterType="map" resultType="map">
+      /*  SELECT * from (SELECT *,rownum rn FROM (*/
+        select tbc.icardid,tbc.ccardimg,
+        tbc.ccardname,tbc.iapplicationnum,tbc.ccardgain,tbc.iorder,tbc.ctag,tbc.isnormal
+        from
+        (select tt1.*,nvl(tt2.isnormal,0) isnormal from tb_bank_card tt1 left join TB_APPLY_CREDIT_MATERIAL_P tt2 on
+        tt1.ibankid=tt2.ibankid)tbc,
+        tb_city_bank tcb, tb_bank tb, tb_card_use tcu,
+        tb_bank_use tbu
+        where tbc.ibankid = tb.ibankid
+        and tcb.ibankid =
+        tbc.ibankid
+        and tcu.icardid = tbc.icardid
+        and tcu.iuseid = tbu.iuseid
+        <choose>
+            <when test="cityid !=null">
+                and tcb.iareaid = #{cityid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>and tcb.iareaid = -1
+            </otherwise>
+        </choose>
+       <if test="
+        bankid!=null">
+           and
+           tbc.ibankid =#{bankid,jdbcType=VARCHAR}
+       </if>
+        <if test="useid!=null">
+            and tbu.iuseid =#{useid,jdbcType=VARCHAR}
+        </if>
+        <if test="cardlevel!=null">
+            and tbc.ccardlevel =#{cardlevel,jdbcType=VARCHAR}
+        </if>/*and ( ? = -1 or tbc.ibankid =
+        ? )
+        and ( ? = -1 or tbu.iuseid = ?)
+        and ( ? = '-1' or tbc.ccardlevel =
+        ?)*/
+        and
+        tbc.
+        istate =1
+        group
+        by tbc.icardid,tbc.ccardimg,
+        tbc.
+        ccardname,tbc.iapplicationnum,tbc.ccardgain,tbc.iorder,tbc.ctag,tbc.isnormal,tbc.ilable
+        order by
+        tbc.iorder desc,tbc.iapplicationnum desc, tbc.icardid desc /*) rownum &gt;=${start}
+        ) rn &lt; ${start}*/
+    </select>
+
+    <select id="queryThemeByCardId" parameterType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.Card" resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.dto.BankCardDto">
+         select * from (select * from (
+           select  tt1.icardid,tt1.ibankid,tt1.ccardname,tt1.ccardgain, tt1.iapplicationnum,tt1.ccardfreenum, tt1.cdailyinterest,
+            tt1.clatefeerate, tt1.ccarshfee, tt1.cconvertrate,tt1.ccounterfee,tt1.cexcessrate,
+            tt1.cprivilege,tt1.ccardservice,tt1.ccardlevel, tt1.ishot, tt1.iorder,
+             tt1.ccardmd5, tt1.ccardimg,tt1.cfetchurl, tt1.crong360url,tt1.clossfee,
+             tt1.changefee, tt1.istate, nvl(tt1.cardaddr, tt3.cardaddr) cardaddr, tt1.ctag,
+             tt1.ccurrency, tt1.cmedium,tt1.cintegral, tt1.ccardlevelname,
+              tt1.cadddate, tt1.cyearfee,  tt1.cyearfeerule, tt1.csplitcost,
+               tt1.cbankcardid, tt1.ccardorg, tt1.cardnormal,tt1.ilable, tt1.cothername,
+                nvl(tt2.isnormal, 0) isnormal from tb_bank_card tt1
+                 left join TB_APPLY_CREDIT_MATERIAL_P tt2
+                   on tt1.ibankid = tt2.ibankid left join   tb_handle_credit tt3
+                     on tt1.ibankid=tt3.ibankid
+                 ) t where t.istate=1 and t.ibankid=#{bankid,jdbcType=VARCHAR}
+                 and t.ccardlevel=#{cardlevel,jdbcType=VARCHAR} and t.icardid!=#{cardid,jdbcType=VARCHAR}) t1
+                 left join tb_card_use t2 on t1.icardid=t2.icardid
+                  <where >
+                      <if test="useids!=null">
+                          t2.iuseid in
+                          <foreach collection="useids" item="useid" index="index" open="(" close=")" separator=",">
+                              #{useid}
+                          </foreach>
+                      </if>
+                  </where>
+        order by t1.ishot,t1.iapplicationnum desc
+    </select>
+
+    <select id="queryCardForTotalSearch" parameterType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.Card" resultType="map">
+        select tbc.icardid,tbc.ccardimg,
+        tbc.ccardname,tbc.iapplicationnum,tbc.ccardgain,tbc.iorder,tbc.ctag,tbc.isnormal
+        from
+        (select tt1.*,nvl(tt2.isnormal,0) isnormal from tb_bank_card tt1 left join TB_APPLY_CREDIT_MATERIAL_P tt2 on
+        tt1.ibankid=tt2.ibankid)tbc,
+        tb_city_bank tcb, tb_bank tb, tb_card_use tcu,
+        tb_bank_use tbu
+        where tbc.ibankid = tb.ibankid
+        and tcb.ibankid =
+        tbc.ibankid
+        and tcu.icardid = tbc.icardid
+        and tcu.iuseid = tbu.iuseid
+        <choose>
+            <when test="cityid !=null">
+                and tcb.iareaid = #{cityid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>and tcb.iareaid = -1
+            </otherwise>
+        </choose>
+        and (tbc.ccardname like '%'||#{name,jdbcType=VARCHAR}||'%' or
+        tbc.ccardname like  '%'||#{name,jdbcType=VARCHAR}||'%'  or
+        tbc.ctag like '%'||#{name,jdbcType=VARCHAR}||'%')
+        and tbc.istate =1
+        group by tbc.icardid,tbc.ccardimg,
+        tbc.ccardname,tbc.iapplicationnum,tbc.ccardgain,tbc.iorder,tbc.ctag,tbc.isnormal,tbc.ilable
+        order by
+        tbc.iorder desc,tbc.iapplicationnum desc, tbc.icardid desc
+    </select>
+</mapper>

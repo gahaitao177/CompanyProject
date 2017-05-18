@@ -1,0 +1,15 @@
+target/
+.classpath
+.project
+.settings/
+.svn/
+classes/
+lib/
+.externalToolBuilders/
+*.iml
+.idea/
+.ssd
+.compiled/
+bin/
+build/
+prd/

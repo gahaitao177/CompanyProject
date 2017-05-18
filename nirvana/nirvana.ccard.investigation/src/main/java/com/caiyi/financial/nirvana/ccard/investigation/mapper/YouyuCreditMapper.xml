@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.caiyi.financial.nirvana.ccard.investigation.mapper.YouyuCreditMapper">
+
+    <select id="queryCreditInfoByUserId" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditScoreNewDto">
+        select
+            tza.cuserid as userId,
+            tcr.icrid as zxId,
+            tcr.crealname as name,
+            tcr.cmarstatus as marStatus,
+            tcr.icreditcc as cardNum,
+            tzg.igjj_month_num as gjjNum,
+            tzg.igjj_month_total as  gjjMonthMoney,
+            case when tcr.icreditco > 0 or tcr.icreditcso > 0 then 1 else 0 end as cardOverdueStatus,
+            case when tcr.iloano > 0 or tcr.iloanso > 0 then 1 else 0 end as loanOverdueStatus
+        from tb_zx_account tza
+        left join tb_credit_reference tcr on tza.cloginname = tcr.cloginname and tza.cuserid = tcr.cuserid
+        left join tb_zx_credit_score tzcs on tza.cuserid = tzcs.ccs_userid
+        left join tb_zx_gjj tzg on tzcs.igjj_id = tzg.igjj_id
+        where tza.cuserid =#{cuserId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryCreditReportDetails" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditReportDetailsDto">
+        select * from tb_cr_reportdetails t where t.icrid = #{icrid,jdbcType=INTEGER}  and t.itype not in (3,4)
+    </select>
+
+    <select id="queryBillsByCondition" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditScoreNewDto">
+        select a.ibillid as billId,a.itotalquota as cardQuota
+        from (select tbb.ibillid,tbb.itotalquota,tbb.uname
+        from tb_bank_bill tbb
+        where tbb.cuserid = #{cuserId,jdbcType=VARCHAR}
+        and tbb.isdel = 0) a
+        where 1=1
+        <if test="name != null">
+            and a.uname = #{name,jdbcType=VARCHAR}
+            or a.uname is null
+        </if>
+    </select>
+
+    <select id="queryMonthInfos" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.BillMonthInfoDto">
+        select * from (
+          select t.imonthid,t.cmonth,t.ishouldrepayment,t.ilowestrepayment,t.crepaymentdate,
+                    (select count(1)
+                    from tb_bill_detail tbd
+                    where tbd.imonthid = t.imonthid
+                    and tbd.itype = 0
+                    and tbd.icosttype != 8) as consumeNum
+        from tb_bill_month t
+        where t.ibillid = #{billId,jdbcType=INTEGER}
+        and t.isbill = 1
+        order by t.cmonth desc)
+        where rownum &lt;7
+    </select>
+
+    <select id="queryLatelyBillNew" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.QuotaReportDto">
+        select *
+        from tb_bill_detail t
+        where t.itype = 1
+        and t.imonthid in
+            (select * from
+                (select tbm.imonthid
+                from tb_bill_month tbm
+                where tbm.ibillid = 3715
+                order by tbm.cmonth desc)
+        where rownum&lt;8)
+    </select>
+
+    <select id="queryEducationInfo" resultType="map">
+        select * from
+          (select txca.cca_userid as userId,
+                      txca.ica_education_level as eduLevel,
+                      txce.cce_code as code
+          from tb_xx_credit_account txca,tb_xx_credit_education txce
+          where txca.ica_id = txce.ica_id
+          and txca.cca_userid = #{cuserId,jdbcType=VARCHAR}
+          order by txca.ica_education_level desc)
+        where rownum = 1
+    </select>
+
+</mapper>

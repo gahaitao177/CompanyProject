@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.bill.bank.mapper.BankMapper">
+    <select id="select" resultType="map" parameterType="com.caiyi.financial.nirvana.ccard.bill.bean.Channel">
+	select tu.cuserid from tb_user tu where tu.cuserid =#{cuserId,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getUserBankBill" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        SELECT icreditid,ibillid,iskeep,ioutsideid,cexpiredate FROM  (  SELECT A.*, ROWNUM RN  FROM ( select icreditid,ibillid,iskeep,ioutsideid,cexpiredate from tb_bank_bill where icard4num=#{0,jdbcType=VARCHAR} and ibankid=#{1,jdbcType=INTEGER} and cuserid=#{2,jdbcType=VARCHAR} and iswebormail=0 ORDER BY CADDDATE ASC) A WHERE ROWNUM &lt;= 1) WHERE RN &gt;= 0
+    </select>
+
+    <select id="getUserBankBillById" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        SELECT * FROM tb_bank_bill where ibillid=#{0,jdbcType=INTEGER} AND ISDEL=0
+    </select>
+    <select id="getUserBankBillByBillId" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        SELECT * FROM tb_bank_bill where ibillid=#{0,jdbcType=INTEGER} and cuserid=#{1,jdbcType=INTEGER} AND ISDEL=0
+    </select>
+    <select id="getUserBankBillByUser" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+      SELECT t_bill.* FROM tb_bank_bill t_bill,tb_bank t_bank WHERE t_bill.ibankid = t_bank.ibankid AND t_bill.cuserid=#{0,jdbcType=VARCHAR} AND ISDEL=0
+    </select>
+    <select id="getUserCardInfo" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        SELECT t_bill.* FROM tb_bank_bill t_bill,tb_bank t_bank WHERE t_bill.ibankid = t_bank.ibankid AND t_bill.cuserid=#{cuserId,jdbcType=VARCHAR} AND t_bill.ibillid=#{billId,jdbcType=INTEGER} AND ISDEL=0
+    </select>
+    <insert id="createRepaymentOrder" parameterType="com.caiyi.financial.nirvana.ccard.bill.dto.RepaymentOrderDto">
+        INSERT INTO TB_REPAYMENT_ORDER( CPARTNER_ID, CCHANNEL_ID, CBANK_ALIAS, CCARD_TAIL, IBILL_ID, CUSER_ID, CCARD_NAME,
+         IAMOUNT, TIME_STAMP, CSIGN, ISTATE, CBANK_TYPE, DAPPLY_TIME,DPAY_TIME,
+         DREPAY_TIME, CCONFIRM_MSG, IPAY_TYPE, CCOMMENTS, ICOMMISSION, CWX_REPAY_NO,
+         IWX_AMOUNT, CWX_SIGN)
+        VALUES( #{cpartner_id,jdbcType=VARCHAR}, #{cchannel_id,jdbcType=VARCHAR}, #{cbank_alias,jdbcType=VARCHAR}, #{ccard_tail,jdbcType=VARCHAR}, #{ibill_id,jdbcType=INTEGER}, #{cuser_id,jdbcType=VARCHAR},
+         #{ccard_name,jdbcType=VARCHAR}, #{iamount,jdbcType=FLOAT}, #{time_stamp,jdbcType=VARCHAR}, #{csign,jdbcType=VARCHAR}, #{istate,jdbcType=INTEGER},
+         #{cbank_type,jdbcType=VARCHAR}, #{dapply_time,jdbcType=DATE}, #{dpay_time,jdbcType=DATE}, #{drepay_time,jdbcType=DATE}, #{cconfirm_msg,jdbcType=VARCHAR}, #{ipay_type,jdbcType=INTEGER},
+         #{ccomments,jdbcType=VARCHAR}, #{icommission,jdbcType=FLOAT}, #{cwx_repay_no,jdbcType=VARCHAR}, #{iwx_amount,jdbcType=FLOAT}, #{cwx_sign,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="updateRepayOrder">
+        UPDATE TB_REPAYMENT_ORDER SET CCHANNEL_ID= #{cchannel_id,jdbcType=VARCHAR},CBANK_ALIAS= #{cbank_alias,jdbcType=VARCHAR},CCARD_TAIL= #{ccard_tail,jdbcType=VARCHAR},
+        IBILL_ID= #{ibill_id,jdbcType=INTEGER},CUSER_ID= #{cuser_id,jdbcType=VARCHAR},CCARD_NAME= #{ccard_name,jdbcType=VARCHAR},
+        IAMOUNT= #{iamount,jdbcType=INTEGER},TIME_STAMP= #{time_stamp,jdbcType=VARCHAR},CSIGN= #{csign,jdbcType=VARCHAR},
+        ISTATE= #{istate,jdbcType=INTEGER},CBANK_TYPE= #{cbank_type,jdbcType=VARCHAR},DAPPLY_TIME= #{dapply_time,jdbcType=DATE},DPAY_TIME= #{dpay_time,jdbcType=DATE},
+        DREPAY_TIME= #{drepay_time,jdbcType=DATE},CCONFIRM_MSG= #{cconfirm_msg,jdbcType=VARCHAR},IPAY_TYPE= #{ipay_type,jdbcType=INTEGER},
+        CCOMMENTS= #{ccomments,jdbcType=VARCHAR},ICOMMISSION= #{icommission,jdbcType=INTEGER},CWX_REPAY_NO= #{cwx_repay_no,jdbcType=VARCHAR},
+        IWX_AMOUNT= #{iwx_amount,jdbcType=INTEGER},CWX_SIGN= #{cwx_sign,jdbcType=VARCHAR} WHERE CPARTNER_ID= #{cpartner_id,jdbcType=VARCHAR}
+    </update>
+
+
+    <insert id="addBankPoint" parameterType="com.caiyi.financial.nirvana.ccard.bill.bean.BankPoint">
+        insert into tb_bank_point
+            (ibankid,
+             icityid,
+             cnetpointname,
+             caddr,
+             cphone,
+             clng,
+             clat,
+             itype,
+             cnetpointtime,
+             istatus)
+        values
+            (#{ibankid,jdbcType = INTEGER},
+             #{icityid,jdbcType = INTEGER},
+             #{cnetpointname,jdbcType = VARCHAR},
+             #{caddr,jdbcType = VARCHAR},
+             #{cphone,jdbcType = VARCHAR},
+             #{clng,jdbcType = VARCHAR},
+             #{clat,jdbcType = VARCHAR},1,
+             #{cnetpointtime,jdbcType = VARCHAR},1)
+    </insert>
+
+    <insert id="addBankPointList" parameterType="com.caiyi.financial.nirvana.ccard.bill.bean.BankPoint">
+        insert into tb_bank_point
+        (ibankid,
+        icityid,
+        cnetpointname,
+        caddr,
+        cphone,
+        clng,
+        clat,
+        itype,
+        cnetpointtime,
+        istatus)
+        select a.*
+        from (
+        <foreach collection="bankPoints" item="b" separator="union all" index="index">
+            SELECT
+            #{b.ibankid,jdbcType = INTEGER} ibankid,
+            #{b.icityid,jdbcType = INTEGER} icityid,
+            #{b.cnetpointname,jdbcType = VARCHAR} cnetpointname,
+            #{b.caddr,jdbcType = VARCHAR} caddr,
+            #{b.cphone,jdbcType = VARCHAR} cphone,
+            #{b.clng,jdbcType = VARCHAR} clng,
+            #{b.clat,jdbcType = VARCHAR}clat,
+            1 itype,
+            #{b.cnetpointtime,jdbcType = VARCHAR} cnetpointtime,
+            1 istatus
+            FROM dual
+        </foreach>
+        ) a
+    </insert>
+
+    <select id="queryCity" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.AreaDto">
+        select iareaid,careaname from tb_area where ipareaid = 0 order by iareaid
+    </select>
+
+    <select id="queryCreditHandle2" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CreditHandleDto">
+        select t.ibankid, t1.cbankname, t.cactivation, t.cbankicon
+        from tb_handle_credit t
+        left join tb_bank t1
+        on t.ibankid = t1.ibankid
+        where t.cactivation is not null
+              and t.ibankid = #{bankId,jdbcType = INTEGER}
+        order by t.iorder desc
+    </select>
+
+    <select id="queryCreditHandle3" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CreditHandleDto">
+        select t.ibankid, t1.cbankname, t.cactivation, t.cbankicon
+        from tb_handle_credit t
+        left join tb_bank t1
+        on t.ibankid = t1.ibankid
+        where t.cactivation is not null
+        order by t.iorder desc
+    </select>
+
+    <select id="queryProgress" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CreditHandleDto">
+        select t.ibankid, t1.cbankname, t.cprogressaddr,t.cbankicon
+        from tb_handle_credit t
+        left join tb_bank t1
+        on t.ibankid = t1.ibankid
+        where t.cprogressaddr is not null
+        order by t.iorder desc
+    </select>
+
+    <select id="queryUserCollectionBank" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CreditHandleDto">
+        select t.ibankid, tb.cbankname, t.cbankicon
+        from tb_handle_credit t
+        left join tb_user_bank tub
+        on t.ibankid = tub.ibankid
+        left join tb_bank tb
+        on t.ibankid = tb.ibankid
+        where tub.cnickid = #{cuserId,jdbcType = VARCHAR}
+    </select>
+
+    <select id="queryUserOtherBank" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CreditHandleDto">
+        select t.ibankid, tb.cbankname, t.cbankicon
+        from tb_handle_credit t
+        left join tb_user_bank tub
+        on t.ibankid = tub.ibankid
+        left join tb_bank tb
+        on t.ibankid = tb.ibankid
+        minus
+        select t.ibankid, tb.cbankname, t.cbankicon
+        from tb_handle_credit t
+        left join tb_user_bank tub
+        on t.ibankid = tub.ibankid
+        left join tb_bank tb
+        on t.ibankid = tb.ibankid
+        where tub.cnickid = #{cuserId,jdbcType = VARCHAR}
+    </select>
+
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.material.mapper.MaterialMapper">
+
+    <select id="query_filterCard" parameterType="map" resultType="map">
+        select t1.cprivilege "cprivilege",t1.icardid "icardid",t1.ibankid "ibankid" ,t1.ccardname "ccardname",
+        t1.iapplicationnum "iapplicationnum",t1.ccardgain "ccardgain",t1.ccardlevel "ccardlevel",
+        t1.ctag "ctag",cyearfee "cyearfee",t1.ccardimg "ccardimg",t1.ccurrency "ccurrency",
+        t1.ccardlevelname "ccardlevelname",t1.cardaddr "cardaddr",t1.cardaddrios "cardaddrios",t1.isnormal "isnormal",
+        t1.cardnormal "cardnormal",t1.ilable "ilable" from
+		(select tt1.*,nvl(tt2.isnormal,0) isnormal from tb_bank_card tt1
+        left join  TB_APPLY_CREDIT_MATERIAL_P  tt2 on tt1.ibankid=tt2.ibankid) t1 ,
+		(select distinct ibankid from tb_city_bank  where ${citysql}  ${banksql}) t2,
+		(select distinct icardid from tb_card_use where ${usesql} ) t3,
+		(select ibankid,icooperation from tb_bank where icooperation> ${icooperation} ) t4,
+        (select icardid from tb_bank_card where  ${totalsearch} ) t5
+		where istate=1  and t1.ibankid=t4.ibankid and t1.icardid = t3.icardid and t1.icardid = t5.icardid  and t1.ibankid = t2.ibankid ${isnormal}
+        <if test="ishot!=null">
+            and t1.ishot=${ishot}
+        </if>
+        order by t1.ishot desc,t1.iorder desc,t1.iapplicationnum desc,t1.icardid
+    </select>
+    <insert id="save_apply_credit_material" parameterType="com.caiyi.financial.nirvana.ccard.material.bean.MaterialModel" >
+          insert into tb_apply_credit_material
+	      (IMATERIALID, CPHONE, CNAME, CENGLISHNAME,CEMAIL, IANNUALSALARY, CIDCARD, MARITALSTATUS,
+          IDEGREE, RESIDENCESTATUS, IHOME_PID, IHOME_CID,IHOME_DID, CHOME_TELNUM, CHOME_DETAILADDRESS, CHOME_POSTCODE,
+          ILIVELEN, IPOSTADDRESS, CCOMPANYNAME, ICOMPANY_PID, ICOMPANY_CID,ICOMPANY_DID, CCOMPANY_POSTCODE, CCOMPANY_DETAILADDRESS,
+          INATUREOFUNIT, CCOMPANY_TELNUM, IDEPARTMENT, CDEPARTMENTNAME,ITIMEINJOB, INIATUREOFBUSINESS, FAMILYNAME, IFAMILYTIES,
+          CFAMILYPHONENUM, CEMERGENCYCONTACTNAME, ICEMERGENCYTIES,CEMERGENCYPHONE, CIDEXPIRATIONTIME, CIDISSUEADDRESS, CHAVEBANKCARD,CHAVEBANKCREDIT,
+          ISEX, CTHEME, CSTARTINFO, ICREDITAMOUNT, CPRIMARYSCHOOLNAME, CBAK3, CBAK2, CBAK1, ISTATUS)
+          values (SEQ_A_C_MATERIAL.nextval, #{cphone}, #{cname}, #{cenglishname}, #{cemail}, #{iannualsalary}, #{cidcard},#{maritalstatus}
+          , #{idegree}, #{residencestatus}, #{ihome_pid}, #{ihome_cid}, #{ihome_did}, #{chome_telnum},
+          #{chome_detailaddress}, #{chome_postcode},
+          #{ilivelen}, #{ipostaddress}, #{ccompanyname}, #{icompany_pid}, #{icompany_cid}, #{icompany_did},
+           #{ccompany_postcode}, #{ccompany_detailaddress},#{inatureofunit}, #{ccompany_telnum}, #{idepartment},
+            #{cdepartmentname}, #{itimeinjob}, #{iniatureofbusiness}, #{familyname}, #{ifamilyties},
+             #{cfamilyphonenum},  #{cemergencycontactname},  #{icemergencyties},  #{cemergencyphone},
+              #{cidexpirationtime},  #{cidissueaddress},
+             #{chavebankcard},  #{chavebankcredit}, #{isex},  #{ctheme},  #{cstartinfo},  #{icreditamount},
+             #{cprimaryschoolname},  #{cbak3},  #{cbak2},  #{cbak1}, #{istatus} )
+    </insert>
+    <update id="update_apply_credit_material" parameterType="com.caiyi.financial.nirvana.ccard.material.bean.MaterialModel">
+
+          update TB_APPLY_CREDIT_MATERIAL set CPHONE=#{cphone},
+				CNAME=#{cname}, CENGLISHNAME=#{cenglishname}, CEMAIL=#{cemail},IANNUALSALARY=#{iannualsalary},
+				CIDCARD=#{cidcard},MARITALSTATUS=#{maritalstatus},IDEGREE=#{idegree},RESIDENCESTATUS= #{residencestatus},
+				IHOME_PID=#{ihome_pid},IHOME_CID=#{ihome_cid},IHOME_DID=#{ihome_did},CHOME_TELNUM= #{chome_telnum},
+				CHOME_DETAILADDRESS= #{chome_detailaddress},CHOME_POSTCODE= #{chome_postcode},
+				ILIVELEN=#{ilivelen},IPOSTADDRESS= #{ipostaddress},CCOMPANYNAME=#{ccompanyname},
+				ICOMPANY_PID=#{icompany_pid},ICOMPANY_CID=#{icompany_cid},ICOMPANY_DID=#{icompany_did},
+				CCOMPANY_POSTCODE=#{ccompany_postcode},CCOMPANY_DETAILADDRESS=#{ccompany_detailaddress},
+				INATUREOFUNIT=#{inatureofunit},CCOMPANY_TELNUM=#{ccompany_telnum},
+				IDEPARTMENT=#{idepartment},CDEPARTMENTNAME=#{cdepartmentname},
+				ITIMEINJOB=#{itimeinjob},INIATUREOFBUSINESS=#{iniatureofbusiness},
+				FAMILYNAME=#{familyname},IFAMILYTIES=#{ifamilyties},CFAMILYPHONENUM=#{cfamilyphonenum},
+				CEMERGENCYCONTACTNAME=#{cemergencycontactname},
+				ICEMERGENCYTIES=#{icemergencyties},CEMERGENCYPHONE=#{cemergencyphone},
+				CIDEXPIRATIONTIME=#{cidexpirationtime},CIDISSUEADDRESS=#{cidissueaddress},
+				CHAVEBANKCARD=#{chavebankcard},CHAVEBANKCREDIT=#{chavebankcredit},ISEX=#{isex},CTHEME=#{ctheme},
+				CSTARTINFO=#{cstartinfo},ICREDITAMOUNT=#{icreditamount},CPRIMARYSCHOOLNAME=#{cprimaryschoolname},
+				CBAK3=#{cbak3},CBAK2=#{cbak2},CBAK1=#{cbak1},ISTATUS=#{istatus}
+                where CPHONE=#{cphone}
+    </update>
+
+    <select id="sendYZM" parameterMap="registerSendYZM"  statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_mobregister_send_yzm(?,?,?,?,?,?)
+    </select>
+    <parameterMap id="registerSendYZM" type="java.util.Map" >
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="ipAddr" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="checkYZM" parameterMap="registerCheckYZMPara"  statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_mobregister_check_yzm(?,?,?,?,?)
+    </select>
+    <parameterMap id="registerCheckYZMPara" type="java.util.Map" >
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="totalSearch" parameterType="map" resultType="map">
+        select t1.cprivilege "cprivilege",t1.icardid "icardid",t1.ibankid "ibankid" ,t1.ccardname "ccardname",
+        t1.iapplicationnum "iapplicationnum",t1.ccardgain "ccardgain",t1.ccardlevel "ccardlevel",
+        t1.ctag "ctag",cyearfee "cyearfee",t1.ccardimg "ccardimg",t1.ccurrency "ccurrency",
+        t1.ccardlevelname "ccardlevelname",t1.cardaddr "cardaddr",t1.cardaddrios "cardaddrios",t1.isnormal "isnormal",
+        t1.cardnormal "cardnormal",t1.ilable "ilable" from
+        (select tt1.*,nvl(tt2.isnormal,0) isnormal from tb_bank_card tt1
+        left join  TB_APPLY_CREDIT_MATERIAL_P  tt2 on tt1.ibankid=tt2.ibankid) t1 ,
+        (select distinct ibankid from tb_city_bank  where ${citysql}  ${banksql}) t2,
+        (select distinct icardid from tb_card_use where ${usesql} ) t3,
+        (select ibankid,icooperation from tb_bank where icooperation> ${icooperation} ) t4,
+        (select ibankid from tb_bank_card tbc where  ${totalsearch} ) t5
+        where istate=1  and t1.ibankid=t4.ibankid and t1.icardid = t3.icardid and t1.icardid = t5.icardid and t1.ibankid = t2.ibankid ${isnormal}
+        <if test="ishot!=null">
+            and t1.ishot=${ishot}
+        </if>
+    </select>
+</mapper>

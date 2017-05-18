@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>nirvana</artifactId>
+        <groupId>com.caiyi.financial.nirvana</groupId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>nirvana.ccard.material.rest</artifactId>
+
+
+    <packaging>war</packaging>
+    <dependencies>
+        <dependency>
+            <groupId>com.caiyi.financial.nirvana</groupId>
+            <artifactId>nirvana.ccard.material.model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.caiyi.financial.nirvana</groupId>
+            <artifactId>nirvana.web.support</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.caiyi.huishuaka.service</groupId>
+            <artifactId>credit-service-MapUtil</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit-core-js</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.caiyi.financial.nirvana</groupId>
+            <artifactId>nirvana.web.test.support</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+    <profiles>
+
+        <profile>
+            <id>remotetest</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <profiles.activation>remotetest</profiles.activation>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <id>localdev</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <profiles.activation>localdev</profiles.activation>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>com.caiyi.financial.nirvana</groupId>
+                    <artifactId>nirvana.ccard.material</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>com.caiyi.financial.nirvana</groupId>
+                    <artifactId>nirvana.discount.user</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
+            <id>prd</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <profiles.activation>prd</profiles.activation>
+            </properties>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>src/main/resources/prd</directory>
+                        <filtering>true</filtering>
+                    </resource>
+                    <resource>
+                        <directory>src/main/resources</directory>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <!--打war时候将生成一个classes的jar-->
+                    <attachClasses>true</attachClasses>
+
+                    <!--<warName>${profiles.activation}</warName>-->
+                    <!--激活spring profile -->
+                    <webResources>
+                        <resource>
+                            <filtering>true</filtering>
+                            <directory>src/main/webapp</directory>
+                            <includes>
+                                <include>**/web.xml</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>utf8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <httpConnector>
+                        <port>9090</port>
+                    </httpConnector>
+                    <webAppConfig>
+                        <contextPath>/</contextPath>
+                        <defaultsDescriptor>webdefault.xml</defaultsDescriptor>
+                        <!--指定本web工程直接编译依赖模块的target/classes，就直接忽略了clean install产生的jar，-->
+                        <extraClasspath>
+                            ../nirvana.heartbeat/target/classes/com;
+                            ../nirvana.core/target/classes/com;
+
+                            ../nirvana.discount.user/target/classes/com;
+                            ../nirvana.discount.user.model/target/classes/com;
+                            ../nirvana.web.support/target/classes/com;
+
+                            ../nirvana.ccard.material/target/classes/com;
+                            ../nirvana.ccard.material.model/target/classes/com;
+                            ../nirvana.ccard.material.rest/target/classes/com;
+                        </extraClasspath>
+                    </webAppConfig>
+                    <!-- 指定监控的扫描时间间隔，0为关闭jetty自身的热部署，主要是为了使用jrebel -->
+                    <scanIntervalSeconds>0</scanIntervalSeconds>
+                    <webAppSourceDirectory>
+                        ${basedir}/src/main/webapp
+                    </webAppSourceDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.zeroturnaround</groupId>
+                <artifactId>jrebel-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-rebel-xml</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- 指定生成的jrebel.xml放在哪里， 要求放在web应用的 classpath下 -->
+                    <rebelXmlDirectory>${basedir}/src/main/webapp/WEB-INF/classes</rebelXmlDirectory>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

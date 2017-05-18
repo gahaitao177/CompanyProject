@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath*:cassandra.properties" file-encoding="UTF-8"/>
+
+    <bean id="cassandraPoolingOptions" class="com.caiyi.financial.nirvana.core.cassandra.client.CassandraPoolOptions">
+        <property name="localCoreConnectNum">
+            <value type="int">${localCoreConnectNum}</value>
+        </property>
+        <property name="localMaxConnectNum">
+            <value type="int">${localMaxConnectNum}</value>
+        </property>
+        <property name="remoteCoreConnectNum">
+            <value type="int">${remoteCoreConnectNum}</value>
+        </property>
+        <property name="remoteMaxConnectNum">
+            <value type="int">${remoteMaxConnectNum}</value>
+        </property>
+        <property name="heartbeatIntervalSeconds">
+            <value type="int">${heartbeatIntervalSeconds}</value>
+        </property>
+        <property name="contactPoints">
+            <list>
+                <value type="java.lang.String">${contactPoints.server1}</value>
+                <value type="java.lang.String">${contactPoints.server2}</value>
+                <value type="java.lang.String">${contactPoints.server3}</value>
+            </list>
+        </property>
+        <property name="port">
+            <value type="int">${default.port}</value>
+        </property>
+    </bean>
+    <bean id="cassandraClient" class="com.caiyi.financial.nirvana.core.cassandra.client.CassandraClient">
+        <constructor-arg type="com.caiyi.financial.nirvana.core.cassandra.client.CassandraPoolOptions" ref="cassandraPoolingOptions"/>
+    </bean>
+    <bean id="imageIO" class="com.caiyi.financial.nirvana.core.cassandra.io.ImageIO">
+        <constructor-arg type="com.caiyi.financial.nirvana.core.cassandra.client.CassandraClient" ref="cassandraClient"/>
+    </bean>
+</beans>

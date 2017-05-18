@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.tools.mapper.IdfaMapper">
+    <insert id="addIdfa" parameterType="com.caiyi.financial.nirvana.discount.tools.bean.IdfaBean">
+      insert into  TB_ADVERTISE_IDFA(IAI_ID,CAI_APPID,CAI_IDFA,CAI_SOURCE,CAI_CALLBACK,CAI_TIMESTAMP,CAI_SIGN,ISDEL)
+      values (SEQ_TB_ADVERTISE_IDFA.nextval,
+      #{appid ,jdbcType=VARCHAR},#{idfa ,jdbcType=VARCHAR},#{source ,jdbcType=VARCHAR},#{callback ,jdbcType=VARCHAR},
+      #{timestamp ,jdbcType=VARCHAR},
+      #{sign ,jdbcType=VARCHAR},'0'
+      )
+    </insert>
+    <select id="queryIdfaByIdfa" resultType="com.caiyi.financial.nirvana.discount.tools.bean.IdfaBean"
+            parameterType="string">
+        SELECT
+        CAI_APPID AS appid, CAI_IDFA AS idfa,CAI_SOURCE AS source,CAI_CALLBACK AS callback,CAI_TIMESTAMP AS timestamp,
+        CAI_SIGN AS sign
+        from TB_ADVERTISE_IDFA WHERE CAI_IDFA=#{CAI_IDFA,jdbcType=VARCHAR}
+    </select>
+
+        <select id="queryIosChannelInfo" parameterType="map" resultType="com.caiyi.financial.nirvana.discount.tools.dto.IosPackageInfoDto">
+        select tmc.cvalue iconUrl,
+        tmc.cvalue1  packageName,
+        tmc.cvalue2  downloadUrl
+        from tb_youyu_common_config tmc
+        where  tmc.idel =0 and tmc.ckey =#{0} and tmc.ctype = #{1} order by cupdate desc
+    </select>
+</mapper>

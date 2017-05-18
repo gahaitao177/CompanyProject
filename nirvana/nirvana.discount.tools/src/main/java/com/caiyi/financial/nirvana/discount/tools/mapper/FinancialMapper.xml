@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.tools.mapper.FinancialMapper">
+    <update id="updateProduct" parameterType="map">
+        update  tb_financial_products b  set
+        <trim suffixOverrides=",">
+            <if test="profitNum='1'">
+                b.iprofit=b.iprofit+1,
+            </if>
+            <if test="convenienceNum='1'">
+                b.iconvience=b.iconvience+1,
+            </if>
+            <if test="inTimeNum='1'">
+                b.iintime=b.iintime+1,
+            </if>
+            <if test="safeNum='1'">
+                b.isafe=b.isafe+1,
+            </if>
+        </trim>
+        where b.ip_id=#{ip_id,jdbcType=VARCHAR}
+    </update>
+    
+</mapper>
+    

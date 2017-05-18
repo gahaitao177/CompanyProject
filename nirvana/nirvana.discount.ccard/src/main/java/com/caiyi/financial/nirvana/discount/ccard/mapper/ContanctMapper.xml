@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.ccard.mapper.ContanctMapper">
+    <select id="query_coll_wechatList_page" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.ContanctDto" parameterType="string">
+        <![CDATA[
+        select t1.istoreid,t1.cadddate cd,t1.itype,t1.idel,t1.cuserid,t2.*,t4.icityid,t4.ibankid from
+            tb_user_collection t1,TB_BANK_WECHAT_MSG t2,TB_BANK_WECHAT t4 where
+                 t1.istoreid=t2.imsgid and t4.copenid=t2.copenid and t1.itype=9
+                 and t1.idel=0 and t1.cuserid=#{cuserid, jdbcType=VARCHAR}  order by cd desc
+        ]]>
+    </select>
+    <select  id="query_wechatList_page" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.ContanctDto" parameterType="map">
+       <!-- <![CDATA[
+          select * from (
+            select g.*, rownum rn from (select a.icityid,a.ibankid,b.IMSGID,b.copenid,b.cpicurl,b.ctitle,b.curl,b.cpubdate,b.cmodifydate,b.cadddate,b.istate,b.icollectnum,b.ipraisenum,b.iread
+            from TB_BANK_WECHAT a, TB_BANK_WECHAT_MSG b where a.copenid=b.copenid and a.istate!=4 and a.istate!=1 ${whereSql} ) g
+            where rownum<=${endNum}) where rn>=${startNum}
+            order by ${orderSql}
+        ]]>-->
+
+        <![CDATA[
+          select a.icityid,a.ibankid,b.IMSGID,b.copenid,b.cpicurl,b.ctitle,b.curl,b.cpubdate,b.cmodifydate,b.cadddate,b.istate,b.icollectnum,b.ipraisenum,b.iread
+            from TB_BANK_WECHAT a, TB_BANK_WECHAT_MSG b where a.copenid=b.copenid and a.istate!=4 and a.istate!=1 ${whereSql}
+            order by ${orderSql}
+        ]]>
+    </select>
+
+
+    <select id="queryToolArticle" resultType="map" parameterType="map">
+
+        select ctitle articletitle,CABSTRACT articlesubtitle,CICONURL articlepic,CACCESSURL artitleurl
+        from tb_tool_article where isdel =0 and IPUBLISHED=1
+
+        <choose>
+            <when test="typeid!=null">
+                  and itcid=#{typeid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                  and ishot = 1 and itcid in (select itcid from tb_tool_category where
+                itid=( select itid from tb_tool where ccode = #{toolid,jdbcType=VARCHAR} ))
+            </otherwise>
+        </choose>
+
+    </select>
+
+    <select id="queryForTotalsearch" resultType="map" parameterType="map">
+       select icontactId as contactId,ctitle as title,csummary as content,cpicUrl as picUrl,caccessulr as accessUrl from tb_contact t where
+       ${query}
+       and t.ipublished = 1
+       and t.iactive = 0
+        and t.itype = 0
+       </select>
+    <select id="queryContacts" parameterType="map" resultType="map">
+    select t.icontactid "contactId", t.ctitle "title", t.csummary "content", t.curl "url", t.cauthor "author", t.itype "type",
+    t.cpicurl "picUrl", t.dcreatedtime "createdTime", t.ipublished "published", t.corigin "origin", t.cpublishedtime "publishedTime",
+    t.iviews "views",t.caccessulr "accessUrl", t.ciconurl "iconUrl"
+    from TB_CONTACT t where t.IACTIVE = 0  and t.IPUBLISHED = 1 and t.ITYPE  =  #{type,jdbcType=VARCHAR}
+    and ( #{position,jdbcType=VARCHAR}  = '99' or t.clevel = #{position,jdbcType=VARCHAR} ) order by t.icontactid desc
+    </select>
+</mapper>

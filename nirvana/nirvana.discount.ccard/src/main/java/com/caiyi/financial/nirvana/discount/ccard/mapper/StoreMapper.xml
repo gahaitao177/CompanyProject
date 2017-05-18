@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.ccard.mapper.StoreMapper">
+
+    <select id="storeList" resultType="com.caiyi.financial.nirvana.discount.ccard.bean.Store" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Store">
+		select istoreid,cstorename,caddress,regexp_substr(ctel, '[^,]+', 1, 1) ctel,clng,clat,rownum rn from tb_store
+		where
+		ibussinessid= #{ibusinessid,jdbcType=DECIMAL}
+		and icityid= #{icityid,jdbcType=DECIMAL}
+		and istate!=2
+		and camapid != 0
+    </select>
+
+	<select id="queryNearestStoreId" resultType="String" parameterType="map">
+  select istoreid from (
+select istoreid, distance,ROWNUM rn from(
+  select t0.istoreid, t0.distance
+		from (select t1.istoreid,
+		t1.ibankids,
+		GetDistance(t1.clat, t1.clng, #{clat,jdbcType=DOUBLE}, #{clng,jdbcType=DOUBLE}) as distance
+		from tb_store t1
+		where t1.ibussinessid = #{ibussinessid,jdbcType=VARCHAR}
+		and t1.camapid>0
+		and t1.istate > 0
+		and t1.istate != 2
+		and t1.icityid = #{icityid,jdbcType=DECIMAL}) t0
+		left join (select t2.*
+		from tb_cheap t2
+		left join tb_city_cheap t3
+		on t2.icheapid = t3.icheapid
+		where t2.iexpire = 0
+		and t2.ibussinessid = #{ibussinessid,jdbcType=VARCHAR}
+		and t2.isaudit =1
+		and t2.istate > 0
+		and t2.istate != 2
+		and (t3.icityid = #{icityid,jdbcType=DECIMAL} or t3.icityid = 0)) t4
+		on instr(',' || t0.ibankids || ',', ',' || t4.cbankid || ',') > 0
+    order by t0.distance
+    ) t )tt where rn=1
+	</select>
+
+
+	<select id="listStore" resultType="com.caiyi.financial.nirvana.discount.ccard.bean.Store" parameterType="map">
+		    select istoreid,
+                 cstorename,
+                 caddress,
+                 regexp_substr(ctel, '[^,]+', 1, 1) ctel,
+                 clng,
+                 clat,
+                 rownum rn
+            from tb_store
+           where ibussinessid = #{ibusinessid,jdbcType=VARCHAR}
+             and icityid = #{icityid,jdbcType=DECIMAL}
+             and istate != 2
+             and camapid != 0
+
+	</select>
+
+</mapper>

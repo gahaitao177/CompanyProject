@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.user.mapper.UserMapper">
+
+    <select id="Send_PWD_YZM" parameterMap="u_register_send_yzm" statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_mobregister_send_yzm(?,?,?,?,?,?)
+    </select>
+    <parameterMap id="u_register_send_yzm" type="java.util.Map">
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="ipAddr" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+
+    <select id="registerCheckYZM" parameterMap="u_register_check_yzm" statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_mobregister_check_yzm(?,?,?,?,?)
+    </select>
+    <parameterMap id="u_register_check_yzm" type="java.util.Map">
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="query_user_byId" resultType="com.caiyi.financial.nirvana.discount.user.dto.UserDto"
+            parameterType="map">
+        <![CDATA[
+          select CPASSWORD pwd,CPWD9188 pwd9188,ISTATE, cuserid, CPHONE  from tb_user t where 1=1
+        ]]>
+
+        <if test="mobileNo != null and '' != mobileNo">
+            <![CDATA[ AND t.cphone = #{mobileNo} ]]>
+        </if>
+
+        <if test="cuserId != null and '' != cuserId">
+            <![CDATA[ AND t.cuserId = #{cuserId} ]]>
+        </if>
+    </select>
+
+    <select id="query_user_type" resultType="int" parameterType="com.caiyi.financial.nirvana.discount.user.bean.User">
+        <![CDATA[
+          select t.itype from tb_user t where 1=1
+        ]]>
+
+        <if test="mobileNo != null and '' != mobileNo">
+            <![CDATA[ AND t.cphone = #{mobileNo} ]]>
+        </if>
+
+        <if test="cuserId != null and '' != cuserId">
+            <![CDATA[ AND t.cuserid = #{cuserId} ]]>
+        </if>
+
+        <if test="cusername != null and '' != cusername">
+            <![CDATA[ AND t.cusername = #{cusername} ]]>
+        </if>
+    </select>
+
+    <parameterMap type="map" id="parameter_map">
+        <parameter property="uid" javaType="String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="pwd" javaType="String" jdbcType="VARCHAR" mode="IN"/>
+        <parameter property="busiErrCode" javaType="String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="busiErrDesc" javaType="String" jdbcType="VARCHAR" mode="OUT"/>
+        <parameter property="cuserId" javaType="String" jdbcType="VARCHAR" mode="OUT"/>
+    </parameterMap>
+
+    <select id="user_login" statementType="CALLABLE" parameterMap="parameter_map">
+        <![CDATA[
+          {call cpuser.sp_user_login(?, ?, ?, ?, ?)}
+        ]]>
+    </select>
+
+    <insert id="insert_user_record" parameterType="com.caiyi.financial.nirvana.discount.user.bean.User">
+        insert into tb_user
+        (cnickid,cpassword,cpwd9188,cusername,cphone,cregisterdate,cregip,imobbind,cuserid,isource,crealname,cidcard,itype)
+        values(
+        #{uid,jdbcType=VARCHAR},
+        #{pwd,jdbcType=VARCHAR},
+        #{pwd9188,jdbcType=VARCHAR},
+        #{cusername,jdbcType=VARCHAR},
+        #{mobileNo,jdbcType=VARCHAR},
+        #{createTime,javaType=DATE, jdbcType=DATE},
+        #{ipAddr,jdbcType=VARCHAR},
+        #{imobbind,jdbcType=INTEGER},
+        #{cuserId,jdbcType=VARCHAR},
+        #{source,jdbcType=VARCHAR},
+        #{realname,jdbcType=VARCHAR},
+        #{idcard,jdbcType=VARCHAR},
+        #{userType,jdbcType=INTEGER})
+    </insert>
+    <select id="bankBind" parameterMap="u_user_bank_bind" statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_bank_bind(?,?,?,?)
+    </select>
+    <parameterMap id="u_user_bank_bind" type="java.util.Map">
+        <parameter property="cuserId" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="bankId" mode="IN" jdbcType="VARCHAR"/>
+
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+
+    <select id="user_collect_add" parameterMap="u_user_collect_add" statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_collect_add(?,?,?,?)
+    </select>
+    <parameterMap id="u_user_collect_add" type="java.util.Map">
+        <parameter property="cuserId" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="storeId" mode="IN" jdbcType="VARCHAR"/>
+
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="user_praise" parameterMap="s_user_praise" statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_praise(?,?,?,?)
+    </select>
+    <parameterMap id="s_user_praise" type="java.util.Map">
+        <parameter property="cuserId" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="storeId" mode="IN" jdbcType="VARCHAR"/>
+
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+</mapper>

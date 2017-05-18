@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.ccard.mapper.CheapMapper">
+    <select id="query_area2" resultType="list" parameterType="int">
+      select iareaid,careaname,clat,clng,icount,iareatype,iroot,ipareaid,citycode,adcode
+      from tb_area where ipareaid=#{ipareaid,jdbcType=INTEGER} and iareaid in
+      (select t1.iareaid from (select * from tb_loan_dictionary t where t.idicid in
+      (select t.ipdicid from tb_loan_dictionary t where t.itype=2 and t.ccode=#{bankid,jdbcType=INTEGER}
+      and t.istatus=1)) t left join tb_area t1 on t.ccode=t1.adcode where t.itype=1)
+    </select>
+
+
+    <select id="queryCheap" parameterType="string" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.CheapDto">
+        select c.*,bk.*
+		from tb_cheap c left join tb_city_cheap cc on
+		cc.icheapid=c.icheapid
+		left join tb_store s on
+		c.ibussinessid=s.ibussinessid and
+		(s.icityid=cc.icityid or cc.icityid
+		is null) and
+		instr(','||s.ibankids||',', ','||c.cbankid||',')>0
+		left
+		join tb_bank bk on bk.ibankid=c.cbankid
+		where c.iexpire=0 and c.istate
+		> 0 and c.istate!=2 and s.istoreid=#{istoreid,jdbcType=VARCHAR}
+
+    </select>
+
+<select id="queryWindowCount" resultType="Integer" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Window">
+	select count(distinct(s1.ibussinessid)) as num  from (
+ 	select t1.ibussinessid, t1.icityid,GetDiscountMaxBankNewONE(#{cityId,jdbcType=VARCHAR},t1.istoreid) as bankid
+     from  tb_store t1,tb_business t2,tb_cheap t3, tb_city_cheap t4
+        where t1.ibussinessid = t2.ibusinessid  and t1.ibussinessid = t3.ibussinessid and t3.icheapid = t4.icheapid and t4.icityid = t1.icityid
+        and t2.idel = 0 and t1.ibankids is not null
+        and t1.clat is not null and t1.clng is not null and t1.camapid is not null and t1.camapid != 0
+        and t3.iexpire = 0  and t3.istate != 2
+        and t1.icityid = #{cityId,jdbcType=VARCHAR}
+        and (instr(','||#{info1,jdbcType=VARCHAR}||',', ','||t3.cbankid||',')>0 or #{info1,jdbcType=VARCHAR} = '999')
+        and instr(','||t1.ibankids||',', ','||t3.cbankid||',')>0
+        ) s1
+	</select>
+
+	<select id="window_query_distance" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.TopicBussiDto" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Window">
+		select ibusinessid,istoreid,cname,cpicurl1, cpicurl2,distance,ipraisetimes,cslogan,iorder,bankid,grade  from
+    (select s2.ibussinessid as ibusinessid,s2.istoreid,s2.cname,s2.cpicurl1,s2.cpicurl2,s2.distance,s2.ipraisetimes,s2.cslogan ,s2.iorder,s2.bankid,s2.grade from (
+    select  row_number() over(partition by s1.ibussinessid order by s1.distance) as rn ,s1.ibussinessid,s1.istoreid,s1.cname,s1.cpicurl1,s1.cpicurl2, s1.distance,
+    s1.ipraisetimes,s1.iorder,s1.bankid,s1.grade,GetMaxCheapTitle(s1.ibussinessid,s1.icityid,s1.bankid) as cslogan from (
+    select t1.icityid,GetDistance(#{userLat,jdbcType=VARCHAR},  #{userLot,jdbcType=VARCHAR}, t1.clat,t1.clng) as distance, t1.ibussinessid,t1.istoreid,t1.cstorename as cname,t2.cpicurl1,t2.cpicurl2,t2.ipraisetimes ,t2.iorder,
+    GetDiscountMaxBankNewONE(#{bankid,jdbcType=VARCHAR},t1.istoreid) as bankid,GetDiscountMaxGradeNewOne(#{bankid,jdbcType=VARCHAR},t1.istoreid) as grade
+      from tb_store t1,tb_business t2,tb_cheap t3, tb_city_cheap t4
+     where t1.ibussinessid = t2.ibusinessid and t1.ibussinessid = t3.ibussinessid and t3.icheapid = t4.icheapid and t4.icityid = t1.icityid
+            and  t1.ibussinessid = t2.ibusinessid  and t2.idel = 0 and t1.ibankids is not null
+            and t1.clat is not null and t1.clng is not null and t1.camapid is not null and t1.camapid != 0
+            and t3.iexpire = 0  and t3.istate != 2
+     		and t1.icityid = #{cityId,jdbcType=VARCHAR}
+            and (instr(','||#{info1,jdbcType=VARCHAR}||',', ','||t3.cbankid||',')>0 or #{info1,jdbcType=VARCHAR} = '999')
+        	and instr(','||t1.ibankids||',', ','||t3.cbankid||',')>0
+     order by distance
+     )s1
+     )s2
+     where cslogan is not null and rn = 1)
+    order by distance asc ,ibusinessid
+	</select>
+    <select id="window_query_sale" resultType="Integer" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Window">
+      select ibusinessid,istoreid,cname,cpicurl1, cpicurl2,distance,ipraisetimes,cslogan,iorder,bankid,grade from
+    (select s2.ibussinessid as ibusinessid,s2.istoreid,s2.cname,s2.cpicurl1,s2.cpicurl2,s2.distance,s2.ipraisetimes,s2.cslogan ,s2.iorder,s2.bankid,s2.grade from (
+    select  row_number() over(partition by s1.ibussinessid order by s1.distance) as rn ,s1.ibussinessid,s1.istoreid,s1.cname,s1.cpicurl1,
+    s1.cpicurl2, s1.distance,s1.ipraisetimes,s1.iorder,s1.bankid,s1.grade,GetMaxCheapTitle(s1.ibussinessid,s1.icityid,s1.bankid) as cslogan  from (
+    select  t1.icityid, GetDistance(#{userLat,jdbcType=VARCHAR}, #{userLot,jdbcType=VARCHAR}, t1.clat,t1.clng) as distance, t1.ibussinessid,
+    t1.istoreid,t1.cstorename as cname,t2.cpicurl1,t2.cpicurl2,t2.ipraisetimes ,t2.iorder,GetDiscountMaxBankNewONE(#{bankid,jdbcType=VARCHAR},t1.istoreid) as bankid,GetDiscountMaxGradeNewOne(#{bankid,jdbcType=VARCHAR},t1.istoreid) as grade
+      from tb_store t1,tb_business t2,tb_cheap t3, tb_city_cheap t4
+     where t1.ibussinessid = t2.ibusinessid and t1.ibussinessid = t3.ibussinessid and t3.icheapid = t4.icheapid and t4.icityid = t1.icityid
+            and  t1.ibussinessid = t2.ibusinessid  and t2.idel = 0 and t1.ibankids is not null
+            and t1.clat is not null and t1.clng is not null and t1.camapid is not null and t1.camapid != 0
+            and t3.iexpire = 0  and t3.istate != 2
+            and t1.icityid = #{cityId,jdbcType=VARCHAR}
+            and (instr(','||#{info1,jdbcType=VARCHAR}||',', ','||t3.cbankid||',')>0 or #{info1,jdbcType=VARCHAR} = '999')
+        	and instr(','||t1.ibankids||',', ','||t3.cbankid||',')>0
+     order by distance
+     )s1
+
+     )s2
+    where cslogan is not null and rn = 1)
+    order by grade desc ,ibusinessid
+    </select>
+    <select id="window_query_hot" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.TopicBussiDto" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Window">
+        select ibusinessid,istoreid,cname,cpicurl1, cpicurl2,distance,cslogan,bankid,ipraisetimes,isavetimes, ipvtimes from
+    (select s2.ibussinessid as ibusinessid,s2.istoreid,s2.cname,s2.cpicurl1,s2.cpicurl2,s2.distance,s2.ipraisetimes,s2.cslogan,s2.bankid,s2.ipvtimes,s2.isavetimes from (
+    select  row_number() over(partition by s1.ibussinessid order by s1.distance) as rn ,s1.ibussinessid,s1.istoreid,s1.cname,s1.cpicurl1,
+    s1.cpicurl2, s1.distance,s1.ipraisetimes,s1.iorder,s1.bankid,s1.grade,s1.ipvtimes,s1.isavetimes,GetMaxCheapTitle(s1.ibussinessid,s1.icityid,s1.bankid) as cslogan   from (
+    select  t1.icityid,GetDistance(#{userLat,jdbcType=VARCHAR}, #{userLot,jdbcType=VARCHAR}, t1.clat,t1.clng) as distance, t1.ibussinessid,
+    t1.istoreid,t1.cstorename as cname,t2.cpicurl1,t2.cpicurl2,t2.ipraisetimes ,t2.iorder,GetDiscountMaxBankNewONE(#{bankid,jdbcType=VARCHAR},t1.istoreid) as bankid,GetDiscountMaxGradeNewOne(#{bankid,jdbcType=VARCHAR},t1.istoreid) as grade ,t2.ipvtimes,t2.isavetimes
+      from tb_store t1,tb_business t2,tb_cheap t3, tb_city_cheap t4
+     where t1.ibussinessid = t2.ibusinessid and t1.ibussinessid = t3.ibussinessid and t3.icheapid = t4.icheapid and t4.icityid = t1.icityid
+            and  t1.ibussinessid = t2.ibusinessid  and t2.idel = 0 and t1.ibankids is not null
+            and t1.clat is not null and t1.clng is not null and t1.camapid is not null and t1.camapid != 0
+            and t3.iexpire = 0  and t3.istate != 2
+     		and t1.icityid = #{cityId,jdbcType=VARCHAR}
+            and (instr(','||#{info1,jdbcType=VARCHAR}||',', ','||t3.cbankid||',')>0 or #{info1,jdbcType=VARCHAR} = '999')
+        	and instr(','||t1.ibankids||',', ','||t3.cbankid||',')>0
+     order by distance
+     )s1
+     )s2
+    where cslogan is not null and rn = 1)
+    order by ipraisetimes desc,isavetimes desc,ipvtimes desc,ibusinessid
+   </select>
+
+    <select id="topic_business_query" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.TopicBussiDto" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Window">
+       select s2.ibussinessid as ibusinessid,s2.istoreid,s2.cname,s2.clogo,s2.distance,GetCheapTypeNew(s2.ibankids,s2.ibussinessid,s2.icityid) as ccheaptype,GetStoreBank(s2.ibankids) as bankids,GETCheapInfoNew(s2.ibankids,s2.ibussinessid,s2.icityid) as cheaptitle,GetTopicSaleLevel(s2.ibankids,s2.ibussinessid,s2.icityid) as salelevel from (
+		select  row_number() over(partition by s1.ibussinessid order by s1.ibussinessid) as rn ,s1.ibussinessid,s1.istoreid,s1.cname,s1.clogo,distance,s1.icityid,s1.ibankids from (
+		select GetDistance(#{userLat,jdbcType=VARCHAR}, #{userLot,jdbcType=VARCHAR},t1.clat,t1.clng) as distance, t1.ibussinessid,t1.istoreid,t1.cstorename as cname,t2.clogo,t1.icityid,t1.ibankids
+      from tb_store t1,tb_business t2,tb_cheap t3, tb_city_cheap t4
+     where t1.ibussinessid = t2.ibusinessid and t1.ibussinessid = t3.ibussinessid and t3.icheapid = t4.icheapid and t4.icityid = t1.icityid
+     and  t1.ibussinessid = t2.ibusinessid  and t2.idel = 0 and t1.ibankids is not null
+     and t1.clat is not null and t1.clng is not null and t1.camapid is not null and t1.camapid != 0
+        and t3.iexpire = 0  and t3.istate != 2
+        and t1.icityid = #{cityId,jdbcType=VARCHAR}
+		and t2.ibusinessid in (select tcp.icheapid from tb_topic_cheap tcp where tcp.itopicid =#{topicId,jdbcType=VARCHAR} and tcp.iexpire = 1 )
+ 	order by distance
+ 	)s1
+ 	)s2
+	where rn = 1
+    </select>
+    <select id="totalsearch_contanct" resultType="map" parameterType="map">
+        select icontactId as "contactId",
+        ctitle     as "title",
+        csummary   as "content",
+        cpicUrl    as "picUrl",
+        caccessulr as  "accessUrl"
+        from tb_contact t
+        where ${totalsearch}  and t.ipublished = 1 and t.iactive = 0
+        and t.itype = 0 order by icontactId desc
+    </select>
+    <select id="queryMqkfInfo" resultType="map" parameterType="map">
+        select ckey,cvalue from tb_push_config where (itype = 3 and ckey = #{appVersion,jdbcType=VARCHAR}) or (itype = 2 and ckey = 'MQKFID') or (itype = 2 and ckey = 'serviceTel') order by ckey desc
+    </select>
+</mapper>

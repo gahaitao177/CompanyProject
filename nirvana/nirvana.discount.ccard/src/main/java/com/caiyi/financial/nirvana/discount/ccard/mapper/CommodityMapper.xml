@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.caiyi.financial.nirvana.discount.ccard.mapper.CommodityMapper">
+        <select id="query_index_commodity" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.BankCommodityDto" parameterType="map">
+            <![CDATA[
+                select * from TB_BANK_JF_COMMODITY where 1=1 and istate=0  ${sqlwhere}
+             ]]>
+
+        </select>
+
+      <select id="query_jf_commodity" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.BankCommodityDto" parameterType="map">
+
+        SELECT t2.* from ( SELECT t1.* ,ROWNUM numbers from (select * from TB_BANK_JF_COMMODITY where 1=1 and istate=0
+
+          <if test="ibankid !=null ">
+              and ibankid = #{ibankid,jdbcType=VARCHAR}
+          </if>
+          <if test="ccategory !=null ">
+              and icateid = #{ccategory,jdbcType=VARCHAR}
+          </if>
+          order by cminscore,to_number(regexp_replace(nvl(coriginprice,'0'), '[^0-9.]')),cmaxscore,icommid desc) t1
+          <![CDATA[
+           where  ROWNUM <= #{start,jdbcType=INTEGER} + #{size1,jdbcType=INTEGER} ) t2
+             ]]>
+            where t2.numbers >#{start,jdbcType=INTEGER}
+      </select>
+    <select id="count_jf_commodity" resultType="Integer" parameterType="map">
+
+        select count(*) from TB_BANK_JF_COMMODITY where 1=1 and istate=0
+
+        <if test="ibankid !=null ">
+            and ibankid = #{ibankid,jdbcType=VARCHAR}
+        </if>
+        <if test="ccategory !=null ">
+            and icateid = #{ccategory,jdbcType=VARCHAR}
+        </if>
+
+    </select>
+
+    <!--<select id="queryPointsByUserId" resultType="com.caiyi.financial.nirvana.discount.ccard.dto.CommodityDto" parameterType="String">-->
+
+        <!--select t1.ibankid,t1.icard4num,t1.ipoint,t2.cbankname  from tb_bank_bill t1,-->
+        <!--tb_bank t2 where t1.ibankid=t2.ibankid and  t1.isdel=0-->
+
+        <!--<if test="cuserid !=null ">-->
+            <!--and t1.cuserid=#{cuserid,jdbcType=VARCHAR}-->
+        <!--</if>-->
+
+    <!--</select>-->
+
+</mapper>

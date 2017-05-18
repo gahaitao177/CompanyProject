@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.ccardinfo.mapper.YouyuNewsMapper">
+    <select id="checkNewsCollect" resultType="Integer" parameterType="map">
+        select count(1) as count from tb_user_collection where cuserid = #{cuserid,jdbcType=VARCHAR} and istoreid = #{newsid,jdbcType=INTEGER} and itype = 10
+    </select>
+
+    <insert id="newsCollect">
+        insert into tb_user_collection(cuserid,istoreid,itype) values (#{cuserid,jdbcType=VARCHAR},#{newsid,jdbcType=VARCHAR},10)
+    </insert>
+
+    <select id="queryYouYuNews" parameterType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.Card"
+            resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.dto.YouYuNewsDto">
+        select inewsid as newsId,
+                   ctype as newsType,
+                   csource as source,
+                   ctarget as target,
+                   clogoUrl as logoUrl,
+                   ishowType as showType,
+                   to_char(cadddate, 'yyyy-MM-dd') as newsTime,
+                   (select count(1)
+                    from tb_user_collection
+                    where cuserid = #{cuserId, jdbcType = VARCHAR}
+                    and istoreid = tyn.inewsid
+                    and itype = 10) as isCollect,
+                   ctitle as newsTitle,
+                   ctag as tag
+        from tb_youyu_news tyn
+        where tyn.ctype = #{newsType, jdbcType = VARCHAR}
+        and tyn.idel = 0
+        and ishow = 1
+        order by iorder desc, inewsid desc
+    </select>
+
+    <delete id="delNewsCollect">
+        delete from tb_user_collection where cuserid = #{cuserid,jdbcType=VARCHAR} and instr(#{newsid,jdbcType=VARCHAR},','||istoreid|| ',')>0 and itype = 10
+    </delete>
+
+    <select id="queryNewsCollect" parameterType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.Card"
+            resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.dto.YouYuNewsDto">
+        select t1.inewsid as newsId,
+                   t1.ctype as newsType,
+                   t1.csource as source,
+                   t1.ctarget as target,
+                   t1.clogoUrl as logoUrl,
+                   t1.ishowType as showType,
+                   to_char(t1.cadddate, 'yyyy-MM-dd') as newsTime,
+                   t1.ctitle as newsTitle,
+                   '1' as isCollect,
+                   decode(t1.ctype,'xyk','信用卡','dk','贷款','lc','理财','hot','热门'
+                   ,'zx','征信','gjj','公积金','fd','房贷','理财') as tag
+        from tb_youyu_news t1, tb_user_collection t2
+        where t1.inewsid = t2.istoreid
+        and t1.idel = 0
+        and t1.ishow = 1
+        and t2.idel = 0
+        and t2.itype = 10
+        and t2.cuserid = #{cuserId, jdbcType = VARCHAR}
+        order by t1.iorder desc, t1.inewsid desc
+    </select>
+</mapper>

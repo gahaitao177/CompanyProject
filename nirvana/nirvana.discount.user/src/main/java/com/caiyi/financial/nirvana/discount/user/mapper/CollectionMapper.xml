@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.user.mapper.CollectionMapper">
+
+    <select id="selectCheapDto" parameterType="string"
+            resultType="com.caiyi.financial.nirvana.discount.user.dto.CheapDto">
+      select c.icheapid,c.cbankid,c.ctitle,c.cptype,bk.ishortname, s.ibankids,s.istoreid,s.cstorename,c.iexpire,
+      t5.clogo
+        from tb_cheap c left join  tb_city_cheap cc on cc.icheapid=c.icheapid
+        left join tb_store s on c.ibussinessid=s.ibussinessid and (s.icityid=cc.icityid or cc.icityid is null)  and instr(','||s.ibankids||',', ','||c.cbankid||',')>0
+        left join tb_bank bk on bk.ibankid=c.cbankid
+        inner JOIN  tb_business t5 on s.ibussinessid = t5.ibusinessid
+      where  c.istate > 0 and c.istate!=2 and s.istoreid
+        in (
+         select  ts.istoreid from tb_business tbs, tb_store ts,tb_user_collection tuc where ts.ibussinessid = tbs.ibusinessid and tuc.istoreid = ts.istoreid and
+         tuc.cuserid =#{cuserId,jdbcType=VARCHAR} and tuc.idel = 0 and tuc.iexpire = 0  and tuc.itype = 0
+        )
+    </select>
+
+    <select id="selectMarketCheapDto" parameterType="string"
+            resultType="com.caiyi.financial.nirvana.discount.user.dto.MarketCheapDto">
+        select
+        t2.icheapid,
+        t4.imarketid,
+        t4.cname,
+        t4.clogo,
+        t2.ctitle,
+        t2.cdiscount,
+        t3.cimgurl,
+        t2.cenddate,
+        t1.cadddate
+        from tb_user_collection t1
+        inner join tb_market_cheap t2 on t1.istoreid = t2.icheapid
+        inner join tb_market_cheap_img t3 on t1.istoreid = t3.icheapid
+        inner join tb_market t4 on t2.imarketid = t4.imarketid
+        where t1.idel=0
+        and t1.itype=1
+        and t4.itype=1
+        and t4.istate=1
+        and t2.istate=1
+        and t1.cuserid=#{cuserId,jdbcType=VARCHAR}
+        order by t1.cadddate desc
+    </select>
+
+
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.user.mapper.SpecialPreferentialMapper">
+
+    <select id="qurey_special_preferential" parameterType="com.caiyi.financial.nirvana.discount.user.bean.HomePageBean"
+            resultType="com.caiyi.financial.nirvana.discount.user.bean.SpecialPreferentialBean">
+
+      select * from tb_special_preferential
+        where is_hidden=0 and is_del=0
+       and (citycodes like '%'||#{adcode,jdbcType=VARCHAR}||'%' OR  citycodes='all')
+        <if test="bankids!=null " >
+            and ( ibankid = 'all'
+            <foreach collection="bankids" index="index" item="item">
+                OR instr(ibankid,','||#{item}||',')>0
+            </foreach>
+            )
+        </if>
+       order by  cadddate desc,ibankid asc
+
+    </select>
+
+</mapper>

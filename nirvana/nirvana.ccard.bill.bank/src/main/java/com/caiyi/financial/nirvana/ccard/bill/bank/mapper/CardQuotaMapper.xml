@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.bill.bank.mapper.CardQuotaMapper">
+
+    <select id="queryCardQuotaInfos" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.CardQuotaInfoDto">
+        select *
+        from (select t.imonthid,t.cmonth,t.ishouldrepayment,t.ilowestrepayment,t.imonthquota,t.crepaymentdate,tbb.itotalquota
+                  from tb_bill_month t
+                  left join tb_bank_bill tbb
+                  on t.ibillid = tbb.ibillid
+                  where t.ibillid = #{billId,jdbcType=INTEGER} and t.isbill = 1
+                  order by t.cmonth desc)
+        where rownum &lt;7
+    </select>
+
+    <select id="queryTotalQuota" resultType="Double">
+      select t.itotalquota from tb_bank_bill t where t.ibillid = #{billId,jdbcType=INTEGER}
+    </select>
+
+    <select id="queryQuotaInfo" resultType="map">
+        select t.ibankid as &quot;bankId&quot;,
+                   t.itotalquota     as &quot;cardCurrentMoney&quot;,
+                   t.iavailablequota as &quot;cardSurplusMoney&quot;,
+                   t.fixedquota    as &quot;cardUptoMoney&quot;,
+                   t.zeroquota     as &quot;cardTemporary&quot;,
+                   t.nowzeroquota     as &quot;cardCurrentTempMoney&quot;,
+                   t.nowfixedquota     as &quot;cardCurrentFixedMoney&quot;
+        from tb_bank_bill t
+        where t.ibillid =  #{billId,jdbcType=INTEGER}
+    </select>
+
+    <select id="queryUserCards" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        select t.ibillid,
+               t.ibankid,
+               t.icard4num,
+               t.icreditid,
+               t.itotalquota,
+               t.iavailablequota,
+               t.iswebormail,
+               t.iszero,
+               t.isfixed,
+               t.zeroquota,
+               t.fixedquota
+        from tb_bank_bill t
+        where t.cuserid = #{cuserId, jdbcType = VARCHAR}
+        and t.isdel = 0
+    </select>
+
+    <select id="queryUserCard" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        select t.ibillid,
+                t.ibankid,
+                t.icard4num,
+                t.icreditid,
+                t.itotalquota,
+                t.iavailablequota,
+                t.iswebormail,
+                t.iszero,
+                t.isfixed,
+                t.zeroquota,
+                t.fixedquota
+        from tb_bank_bill t
+        where t.ibillId = #{billId, jdbcType =INTEGER }
+        and t.isdel = 0
+    </select>
+
+    <select id="queryBankInfoById" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankApplyTypeDto">
+        select * from tb_bank_applytype t where t.ibankid = #{bankId, jdbcType =INTEGER }
+    </select>
+
+    <select id="queryLatelyBillNew" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.QuotaReportDto">
+        select res.ibillid,
+                res.cmonth,
+                res.crepaymentdate,
+                res.ishouldrepayment,
+                res.ilowestrepayment,
+                res.imonthquota,
+                abs(tbd.imoney) as imoney,
+                tbd.coccurdate,
+                tbd.ctradedate
+        from (select *
+        from (select *
+        from tb_bill_month tbm
+        where tbm.ibillid = #{billId,jdbcType=INTEGER}
+        order by tbm.cmonth desc)
+        where rownum &lt;8) res
+        left join tb_bill_detail tbd
+        on tbd.imonthid = res.imonthid
+        where tbd.itype = 1
+    </select>
+    <select id="queryPromoteBankList" resultType="java.lang.Integer">
+        select t.ibankid from tb_bank t where t.cpromote = 1
+    </select>
+
+    <insert id="saveForeheadRecord" parameterType="com.caiyi.financial.nirvana.ccard.bill.bean.ForeheadRecord">
+        INSERT INTO TB_BANK_FOREHEADRECORD( FRID, IBILLID, ISPROFIX, OLDLIMIT, SETLIMIT, ISSTATE, CREATETIME)
+        VALUES( #{frid,jdbcType=VARCHAR},#{ibillid,jdbcType=VARCHAR}, #{isprofix,jdbcType=INTEGER},
+            #{oldlimit,jdbcType=DECIMAL}, #{setlimit,jdbcType=DECIMAL},
+            #{isstate,jdbcType=INTEGER},sysdate)
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        update tb_bank_bill
+        <set>
+            <if test="itotalquota != null">
+                ITOTALQUOTA = #{itotalquota,jdbcType=DECIMAL},
+            </if>
+            <if test="nowzeroquota != null">
+                NOWZEROQUOTA = #{nowzeroquota,jdbcType=VARCHAR},
+            </if>
+            <if test="isZero != null">
+                ISZERO = #{isZero,jdbcType=INTEGER},
+            </if>
+            <if test="isFixed != null">
+                ISFIXED = #{isFixed,jdbcType=INTEGER},
+            </if>
+        </set>
+        where IBILLID = #{ibillid,jdbcType=INTEGER}
+    </update>
+
+</mapper>

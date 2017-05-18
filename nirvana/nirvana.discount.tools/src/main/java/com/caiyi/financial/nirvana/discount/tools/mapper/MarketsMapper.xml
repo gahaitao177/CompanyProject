@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.tools.mapper.MarketsMapper">
+        <select id="queryShops" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+                select t1.imarketid, t1.cname, t1.clogo,decode(nvl(t2.mcount, 0), 0,t1.clogogray,t1.clogolist) clogolist, nvl(t2.mcount, 0) num
+                from TB_MARKET t1 left join (select imarketid, count(icheapid) mcount from tb_market_cheap where
+                cenddate>sysdate-1 and istate!=2 group by imarketid order by mcount desc) t2
+                on t1.imarketid = t2.imarketid where itype = 1 and istate = 1
+
+                <if test="cnum != null and '' != cnum">
+                        <![CDATA[ AND rownum  &lt;= #{cnum} ]]>
+                </if>
+        </select>
+
+
+        <select id="queryCoupons" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+            select t3.icheapid, t3.ctitle, t3.cenddate, t3.cdiscount, t3.cimgurl, nvl(t4.collectflag,0) as collectflag from
+            (select t1.icheapid, t1.imarketid, t1.ctitle, t1.cenddate, t1.cdiscount, t2.cimgurl from
+            tb_market_cheap t1 left join tb_market_cheap_img t2 on t1.icheapid = t2.icheapid where
+             istate = 1 and cenddate > sysdate-1) t3 left join (select regexp_replace(ISTOREID,'[0-9]+',1) as collectflag,
+             ISTOREID from tb_user_collection where itype = 1 and cuserid = #{userid,jdbcType=VARCHAR} and idel = 0) t4 on t3.icheapid = t4.istoreid where 1 = 1
+
+           <if test="imarketid != null and '' != imarketid">
+                <![CDATA[ AND imarketid = #{imarketid} ]]>
+           </if>
+
+           <if test="icheapid != null and '' != icheapid">
+                <![CDATA[ AND icheapid = #{icheapid} ]]>
+           </if>
+        </select>
+
+        <select id="queryMarkets" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+            select * from (select imarketid,cname,clogolist from tb_market where itype=2 and istate=1 order by iorder desc)t1,
+            (select distinct t2.imarketid from (select icheapid from  tb_market_cheap where istate=1) t1,
+            tb_market_cheap_city t2 where t1.icheapid=t2.icheapid and (icityid=#{icityid,jdbcType=VARCHAR} or icityid=-1) )t2
+            where t1.imarketid=t2.imarketid
+        </select>
+
+        <select id="queryMarketCheaps" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+            <![CDATA[
+                    select * from (select t1.icheapid,t1.cenddate cendtdate,t1.cstartdate,t1.cenddate,t1.ctitle from tb_market_cheap t1,(select distinct icheapid from tb_market_cheap_city
+                    where (icityid=-1 or icityid=#{icityid,jdbcType=VARCHAR}) and imarketid=#{imarketid,jdbcType=VARCHAR})t2
+                    where t1.icheapid=t2.icheapid and istate=1 order by cstartdate desc)where rownum < #{size,jdbcType=VARCHAR}
+                ]]>
+        </select>
+
+        <select id="queryHomeMarketList" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+             select t3.ibusid, t3.clogo, t3.cbusname, t3.iorder,t3.type from
+                 (select t1.ibusid, t1.clogo, t1.cbusname, t1.iorder,t1.type
+                    from tb_recommend t1
+                    inner join tb_store t2
+                    on t1.ibusid = t2.ibussinessid
+                    where t1.istate = 1
+                    and t1.iorder != 2
+                    and t2.icityid=decode(#{icityid},null,'',#{icityid})
+                    and t2.istate > 0
+                    and t2.istate = 2
+                    and t2.camapid > 0) t3
+                    inner join (select c.*
+                    from tb_cheap c
+                    left join tb_city_cheap cc
+                    on cc.icheapid = c.icheapid
+                    where c.iexpire = 0
+                    and c.istate > 0
+                    and c.istate != 2
+                    and (cc.icityid=decode(#{icityid},null,'',#{icityid}) or cc.icityid is null)
+                   ) t4 on t3.ibusid = t4.ibussinessid
+                    group by t3.ibusid, t3.clogo, t3.cbusname, t3.iorder,t3.type
+        </select>
+
+        <select id="queryHomeFollowMarketList" resultType="com.caiyi.financial.nirvana.discount.tools.dto.MarketDto" parameterType="string">
+              select t3.ibusid, t3.clogo, t3.cbusname, t3.iorder,t3.type from
+                 (select t1.ibusid, t1.clogo, t1.cbusname, t1.iorder,t1.type
+                    from tb_recommend t1
+                    inner join tb_store t2
+                    on t1.ibusid = t2.ibussinessid
+                    where t1.istate = 1
+                    and t1.iorder = 2
+                    and t2.icityid=decode(#{icityid},null,'',#{icityid})
+                    and t2.istate > 0
+                    and t2.istate = 2
+                    and t2.camapid > 0) t3
+                    inner join (select c.*
+                    from tb_cheap c
+                    left join tb_city_cheap cc
+                    on cc.icheapid = c.icheapid
+                    where c.iexpire = 0
+                    and c.istate > 0
+                    and c.istate != 2
+                    and (cc.icityid=decode(#{icityid},null,'',#{icityid}) or cc.icityid is null) ${ibankids}
+                   ) t4 on t3.ibusid = t4.ibussinessid
+                    group by t3.ibusid, t3.clogo, t3.cbusname, t3.iorder,t3.type
+         </select>
+
+</mapper>

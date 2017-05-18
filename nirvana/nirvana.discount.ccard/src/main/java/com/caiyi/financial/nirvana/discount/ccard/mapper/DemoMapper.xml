@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.ccard.mapper.DemoMapper">
+    <select id="select3" resultType="com.caiyi.financial.nirvana.discount.ccard.bean.Demo" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Demo">
+        select * from bk_teset
+    </select>
+    <select id="select4" resultType="map" parameterType="com.caiyi.financial.nirvana.discount.ccard.bean.Demo">
+        select * from bk_teset
+    </select>
+
+
+</mapper>

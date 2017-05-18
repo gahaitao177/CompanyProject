@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+	http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+	<dubbo:application name="UserServiceProvider" />
+	<dubbo:registry protocol="zookeeper"
+		address="192.168.1.90:2181,192.168.1.91:2181,192.168.1.93:2181" />
+	<dubbo:reference id="userInterface" interface="com.caiyi.user.api.UserInterface" />
+	<bean class="com.caiyi.user.util.SpringCtxUtil" />
+
+</beans>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       		 http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+
+    <!-- quartz 任务 -->
+
+    <bean id="closeWebScoket"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <bean name="jobClass" class="com.caiyi.financial.nirvana.quartz.CloseScoket"/>
+        </property>
+        <property name="targetMethod">
+            <value>run</value>
+        </property>
+    </bean>
+
+    <!-- 触发器 -->
+    <bean id="quartzTaskTime"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="closeWebScoket"/>
+        <property name="startDelay" value="1000"/>
+        <property name="cronExpression" value="0 0/5 * * * ?"/>
+    </bean>
+
+    <!-- 触发器  消息发送-->
+    <bean id="sendMessage"
+          class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject">
+            <bean name="jobClass" class="com.caiyi.financial.nirvana.quartz.MessageThread"/>
+        </property>
+        <property name="targetMethod">
+            <value>run</value>
+        </property>
+    </bean>
+
+    <bean id="quartzSendMessage"
+          class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="sendMessage"/>
+        <property name="startDelay" value="1000"/>
+        <property name="cronExpression" value="0 0/15 * * * ?"/>
+    </bean>
+    <!-- 调度 -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean" lazy-init="true">
+        <property name="triggers">
+            <list>
+                <ref bean="quartzTaskTime"/>
+                <!--<ref bean="quartzSendMessage"/>-->
+            </list>
+        </property>
+        <property name="autoStartup" value="true"/>
+    </bean>
+</beans>

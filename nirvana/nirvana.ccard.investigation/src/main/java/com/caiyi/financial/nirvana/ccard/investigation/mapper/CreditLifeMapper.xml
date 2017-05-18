@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.investigation.mapper.CreditLifeMapper">
+
+    <select id="queryPrivileges"  resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.BannerDto" >
+      select * from ( select t.title,t.sub_title subTitle,t.param01 param01,t.param02 param02,t.pic_small_url picUrl
+        ,t.action_type actionType  from tb_home_page t where t.type = 'ZXPRIVILEGE' and t.is_privilege=1
+       and t.is_del=0  and t.is_hidden=0 and
+       (instr(t.city_code,#{cityId,jdbcType=VARCHAR})>0 or t.city_code='all')
+        order by t.iorder asc,cadddate desc ) tt  where  rownum  &lt;=4
+    </select>
+</mapper>

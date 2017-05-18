@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.bill.bank.mapper.BillMapper">
+
+    <select id="billManagerIndex" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BankBillDto">
+        select * from tb_bank_bill tbb where tbb.isdel = 0 and tbb.cuserid=#{0,jdbcType=VARCHAR}
+    </select>
+
+    <update id="updateBillInfo">
+      update tb_bank_bill tbb set tbb.uname =#{0,jdbcType=VARCHAR},tbb.icard4num=#{1,jdbcType=INTEGER},tbb.icashamount = #{2,jdbcType=VARCHAR} where ibillid=#{3,jdbcType=INTEGER} and cuserid=#{4,jdbcType=VARCHAR} AND ISDEL=0
+    </update>
+
+
+
+    <select id="queryLatestBillMonth" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BillMonthDto">
+        select imonthid, cmonth, cbilldate, ishouldrepayment, isbill
+        from (select imonthid, cmonth, cbilldate, ishouldrepayment, isbill
+              from tb_bill_month
+              where ibillid = #{0, jdbcType = VARCHAR}
+              order by cmonth desc)
+        where rownum &lt;7
+    </select>
+
+    <select id="queryMonthlyBill" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BillDetailDto">
+        select tbd.cdesc, tbc.ccosttypename, tbd.imoney*-1 as imoney, tbd.ctradedate as ctradedate,tbd.coccurdate as coccurdate
+        from tb_bill_detail tbd
+        left join tb_bank_costtype tbc
+        on tbd.icosttype = tbc.icostid
+        where tbd.imonthid = #{0, jdbcType = INTEGER}
+        order by tbd.ctradedate desc
+    </select>
+
+    <select id="queryMonthlyBillSpecial" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BillDetailDto">
+        select tbd.cdesc, tbc.ccosttypename, tbd.imoney*-1 as imoney, tbd.ctradedate as ctradedate,tbd.coccurdate as coccurdate
+        from tb_bill_detail tbd
+        left join tb_bank_costtype tbc
+        on tbd.icosttype = tbc.icostid
+        where tbd.imonthid = #{0, jdbcType = INTEGER}
+        order by replace(replace(tbd.ctradedate,'/','-'),'01-','13-') desc
+    </select>
+
+    <select id="queryTotalConsumeBill" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BillConsumeAnalysisDto">
+        select (sum(abs(tbd.imoney))) as money,
+        max(tbd.icosttype) as consumeTypeId,
+        tbc.ccosttypename as consumeType
+        from tb_bill_detail tbd
+        left join tb_bank_costtype tbc
+        on tbd.icosttype = tbc.icostid
+        where tbc.icostid != 8
+        and tbd.imonthid in (select *
+        from (select tbm.imonthid
+        from tb_bill_month tbm
+        where tbm.ibillid = #{0, jdbcType = VARCHAR}
+        order by tbm.cmonth desc)
+        where rownum &lt; 7)
+        group by tbc.ccosttypename
+        order by money desc
+    </select>
+
+    <select id="queryConsumeBillByMonthId" resultType="com.caiyi.financial.nirvana.ccard.bill.dto.BillConsumeAnalysisDto">
+        select sum(tbd.imoney) as money,
+                   tbd.icosttype as consumeTypeId,
+                   max(tbc.ccosttypename) as consumeType
+        from tb_bill_detail tbd
+        left join tb_bank_costtype tbc
+        on tbd.icosttype = tbc.icostid
+        where tbd.imonthid = #{0, jdbcType = INTEGER}
+        group by tbd.icosttype
+        having tbd.icosttype != 8
+        order by money desc
+    </select>
+
+    <select id="queryMonthTime" resultType="map">
+        select min(cmonth) as startMonth,max(cmonth) as endMonth
+        from (select cmonth
+              from tb_bill_month
+              where ibillid = #{0, jdbcType = VARCHAR}
+              order by cmonth desc )
+        where rownum &lt;7
+    </select>
+</mapper>

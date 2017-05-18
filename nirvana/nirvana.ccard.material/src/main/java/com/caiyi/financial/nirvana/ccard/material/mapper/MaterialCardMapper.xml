@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.material.mapper.MaterialCardMapper">
+
+    <select id="query_bank_ProOrCity" parameterType="map" resultType="map">
+        select ibankcityid "ibankcityid",ccityname "ccityname",cbanklevel "cbanklevel",
+        careavalue "careavalue" from tb_district_bank where ibankid=#{ibankid,jdbcType=VARCHAR}
+           and icityid=#{icityid,jdbcType=VARCHAR}
+           <if test="itype!=null">
+               and itype=#{itype,jdbcType=VARCHAR}
+           </if>
+    </select>
+    <select id="apply_credit_relation" resultType="map" parameterType="string">
+        select t.cbankid  "cbankid",t.cfatherid "cfatherid"  from tb_applycredit_relation t where
+        t.ibankid=#{ibankid,jdbcType=VARCHAR}  and t.clocalid=#{clocalid,jdbcType=VARCHAR} and rownum=1
+        <if test="itype!=null">
+            and t.itype=#{itype,jdbcType=VARCHAR}
+        </if>
+        <if test="cfatherid!=null">
+            and t.cfatherid=#{cfatherid,jdbcType=VARCHAR}
+        </if>
+        <if test="cdesc!=null">
+            and cdesc=#{cdesc,jdbcType=VARCHAR}
+        </if>
+    </select>
+
+    <insert id="save_apply_credit_material_dirty" parameterMap="save_apply_credit_material_dirty_bean">
+        insert into tb_apply_credit_material_dirty
+	             (IMATERIALID, CPHONE, CNAME, CENGLISHNAME,CEMAIL, IANNUALSALARY, CIDCARD, MARITALSTATUS,
+                 IDEGREE, RESIDENCESTATUS, IHOME_PID, IHOME_CID,IHOME_DID, CHOME_TELNUM, CHOME_DETAILADDRESS, CHOME_POSTCODE,
+                 ILIVELEN, IPOSTADDRESS, CCOMPANYNAME, ICOMPANY_PID, ICOMPANY_CID,ICOMPANY_DID, CCOMPANY_POSTCODE, CCOMPANY_DETAILADDRESS,
+                 INATUREOFUNIT, CCOMPANY_TELNUM, IDEPARTMENT, CDEPARTMENTNAME,ITIMEINJOB, INIATUREOFBUSINESS, FAMILYNAME, IFAMILYTIES,
+                 CFAMILYPHONENUM, CEMERGENCYCONTACTNAME, ICEMERGENCYTIES,CEMERGENCYPHONE, CIDEXPIRATIONTIME, CIDISSUEADDRESS, CHAVEBANKCARD,CHAVEBANKCREDIT,
+                 ISEX, CTHEME, CSTARTINFO, ICREDITAMOUNT, CPRIMARYSCHOOLNAME, CBAK3, CBAK2, CBAK1, ISTATUS, CTMPPHONE)
+                  values (SEQ_A_C_MATERIAL_dirty.nextval, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,?,
+                  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?,?,?)
+    </insert>
+    <parameterMap id="save_apply_credit_material_dirty_bean" type="java.util.Map">
+        <parameter mode="IN" jdbcType="VARCHAR" property="cphone"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cname"></parameter>
+        <parameter  mode="IN" jdbcType="VARCHAR" property="cenglishname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cemail"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="iannualsalary"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cidcard"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="maritalstatus"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="idegree"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="residencestatus"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ihome_pid"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ihome_cid"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ihome_did"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="chome_telnum"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="chome_detailaddress"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="chome_postcode"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ilivelen"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ipostaddress"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ccompanyname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="icompany_pid"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="icompany_cid"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="icompany_did"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ccompany_postcode"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ccompany_detailaddress"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="inatureofunit"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ccompany_telnum"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="idepartment"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cdepartmentname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="itimeinjob"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="iniatureofbusiness"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="familyname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ifamilyties"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cfamilyphonenum"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cemergencycontactname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="icemergencyties"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cemergencyphone"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cidexpirationtime"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cidissueaddress"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="chavebankcard"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="chavebankcredit"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="isex"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ctheme"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cstartinfo"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="icreditamount"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cprimaryschoolname"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cbak3"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cbak2"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="cbak1"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="istatus"></parameter>
+        <parameter mode="IN" jdbcType="VARCHAR" property="ctmpphone"></parameter>
+    </parameterMap>
+    <update id="update_apply_credit_material_dirty" parameterMap="update_apply_credit_material_dirty_bean">
+        update TB_APPLY_CREDIT_MATERIAL_DIRTY set CPHONE=?,
+				CNAME=?, CENGLISHNAME=?, CEMAIL=?,IANNUALSALARY=?,
+				CIDCARD=?,MARITALSTATUS=?,IDEGREE=?,RESIDENCESTATUS=?,
+				IHOME_PID=?,IHOME_CID=?,IHOME_DID=?,CHOME_TELNUM=?,
+				CHOME_DETAILADDRESS=?,CHOME_POSTCODE=?,ILIVELEN=?,IPOSTADDRESS=?,
+				CCOMPANYNAME=?,ICOMPANY_PID=?,ICOMPANY_CID=?,ICOMPANY_DID=?,
+				CCOMPANY_POSTCODE=?,CCOMPANY_DETAILADDRESS=?,INATUREOFUNIT=?,CCOMPANY_TELNUM=?,
+				IDEPARTMENT=?,CDEPARTMENTNAME=?,ITIMEINJOB=?,INIATUREOFBUSINESS=?,
+				FAMILYNAME=?,IFAMILYTIES=?,CFAMILYPHONENUM=?,CEMERGENCYCONTACTNAME=?,
+				ICEMERGENCYTIES=?,CEMERGENCYPHONE=?,CIDEXPIRATIONTIME=?,CIDISSUEADDRESS=?,
+				CHAVEBANKCARD=?,CHAVEBANKCREDIT=?,ISEX=?,CTHEME=?,
+				CSTARTINFO=?,ICREDITAMOUNT=?,CPRIMARYSCHOOLNAME=?,CBAK3=?,
+				CBAK2=?,CBAK1=?,ISTATUS=?
+                where CTMPPHONE=?
+    </update>
+   <parameterMap id="update_apply_credit_material_dirty_bean" type="java.util.Map">
+        <parameter property="cphone" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cenglishname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cemail" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="iannualsalary" mode="IN" jdbcType="VARCHAR" ></parameter>
+        <parameter property="cidcard" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="maritalstatus" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="idegree" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="residencestatus" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ihome_pid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ihome_cid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ihome_did" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="chome_telnum" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="chome_detailaddress" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="chome_postcode" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ilivelen" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ipostaddress" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ccompanyname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icompany_pid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icompany_cid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icompany_did" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ccompany_postcode" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ccompany_detailaddress" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="inatureofunit" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ccompany_telnum" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="idepartment" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cdepartmentname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="itimeinjob" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="iniatureofbusiness" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="familyname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ifamilyties" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cfamilyphonenum" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cemergencycontactname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icemergencyties" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cemergencyphone" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cidexpirationtime" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cidissueaddress" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="chavebankcard" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="chavebankcredit" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="isex" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ctheme" mode="IN" jdbcType="VARCHAR" ></parameter>
+        <parameter property="cstartinfo" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icreditamount" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cprimaryschoolname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cbak3" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cbak2" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cbak1" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="istatus" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter  property="ctmpphone" mode="IN" jdbcType="VARCHAR"></parameter>
+    </parameterMap>
+    <insert id="saveApplyCard" parameterMap="saveApplyCardPara">
+        insert into tb_card_apply (iapplyid,cprofession,isuse,ioverdue,isocialpay,iworkprove,cname,cphonenum,
+        idegree,cworkorg,cworkplace,iage,icardid,ibankid,icitycode,icountycode,cgroupcode,igender,isuccess,
+        istatus,ihouse,icar) values (seq_applyid.nextval,?,?,0,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+    </insert>
+    <parameterMap id="saveApplyCardPara" type="java.util.Map">
+        <parameter property="cprofession" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="isuse" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="isocialpay" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="iworkprove" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ctmpphone" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="idegree" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ccompanyname" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cworkplace" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="iage" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="cardid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="bankId" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icitycode" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icountycode" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ibizid" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="igender" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="isuccess" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="istatus" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="ihouse" mode="IN" jdbcType="VARCHAR"></parameter>
+        <parameter property="icar" mode="IN" jdbcType="VARCHAR"></parameter>
+    </parameterMap>
+    <select id="query_spreadBank" parameterType="map" resultType="map">
+        select t1.ibankid "ibankid", t4.cbankname "cbankname", t3.hotdeal "hotdeal"
+		from (select distinct t.ibankid from tb_spread_card t
+		where t.istate=1 and t.ichannelid = #{ichannelid,jdbcType=VARCHAR}) t1,
+		tb_city_bank t2,tb_card_bank_sort t3,tb_bank t4
+		where t1.ibankid = t2.ibankid and t1.ibankid = t3.ibankid
+		and t1.ibankid = t4.ibankid and t2.iareaid = #{icityid,jdbcType=VARCHAR}
+		order by t3.iorder desc
+    </select>
+    <select id="query_spreadCard" resultType="map" parameterType="map">
+        select * from (select t1.ispreadid "ispreadid", t1.ibankcardid "ibankcardid",t1.cardaddr "cardaddr",
+        t1.ccardname "ccardname",t1.iorder "iorder",t1.ibankid "t.ibankid",t2.ccardgain "ccardgain",
+        t2.ccardimg "ccardimg",t2.ccardlevel "ccardlevel",t2.ccardlevelname "ccardlevelname",
+        t2.ccurrency "ccurrency",t2.ctag "ctag",t2.cyearfee "cyearfee",t2.iapplicationnum "iapplicationnum",
+        t2.icardid "icardid",t2.ilable "ilable",t2.cprivilege "cprivilege"
+        from (select t.ispreadid,t.ibankcardid,
+        t.cardaddr,t.ccardname, t.iorder,t.ibankid
+        from tb_spread_card t
+        where t.ichannelid = ${ichannelid}
+        and t.istate = 1
+        ${banksql}) t1
+        left join tb_bank_card t2
+        on t1.ibankcardid = t2.icardid
+        inner join (select * from tb_city_bank
+          where ${citysql}
+        ) t3
+        on t2.ibankid = t3.ibankid) t4
+        order by "iorder" desc
+    </select>
+    <insert id="save_apply_credit_log" parameterMap="save_apply_credit_log_para">
+        insert into tb_apply_credit_log (IAPPLYID, ICREDITID, IMATERIALID, CPHONE, CIDCARD,
+         ISTATUS, CRESULTS, CAPPLYDATE, IBANKID, IPARAMTYPE,CNAME,BRITHDAY)
+        values (?, ?, ?, ?, ?, ?, ?, sysdate,?,?,?,to_date(?,'yyyy-MM-dd'))
+    </insert>
+    <parameterMap id="save_apply_credit_log_para" type="java.util.Map">
+        <parameter property="iapplyid"/>
+        <parameter property="icreditid"/>
+        <parameter property="imaterialid"/>
+        <parameter property="cphone"/>
+        <parameter property="cidcard"/>
+        <parameter property="istatus"/>
+        <parameter property="cresults"/>
+        <parameter property="ibankid"/>
+        <parameter property="iparamtype"/>
+        <parameter property="cname"/>
+        <parameter property="brithday"/>
+    </parameterMap>
+    <select id="apply_credit_log_by_id" parameterType="string" resultType="map">
+        select t1.iapplyid "iapplyid",t1.icreditid "icreditid",t1.imaterialid "imaterialid",t1.cphone "cphone",t1.cidcard "cidcard",
+  t1.istatus "istatus",t1.cresults "cresults",t1.capplydate "capplydate",t1.cactivebankpoit "cactivebankpoit",t1.cactivebankpoitphone "cactivebankpoitphone",
+               t1.iactivetype "iactivetype",t1.cactivemethod "cactivemethod",t1.cgift "cgift",t1.cname "cname",t1.brithday "brithday",
+         t3.ccardname "ccardname",
+         t3.ccardgain "ccardgain",
+         t3.ccardimg "ccardimg",
+         t3.ctag "ctag",
+         t3.ibankid "ibankid"
+          from tb_apply_credit_log t1,
+         (select imaterialid from tb_apply_credit_material) t2,
+         tb_bank_card t3
+         where t1.istatus > -1
+           and t1.imaterialid = t2.imaterialid
+           and t1.icreditid = t3.icardid
+           and t1.iapplyid = #{iapplyid,jdbcType=VARCHAR}
+         order by t1.CAPPLYDATE desc
+    </select>
+</mapper>

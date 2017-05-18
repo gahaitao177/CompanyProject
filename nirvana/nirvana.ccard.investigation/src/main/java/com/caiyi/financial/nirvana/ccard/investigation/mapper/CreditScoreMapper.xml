@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.investigation.mapper.CreditScoreMapper">
+
+
+    <select id="queryCreditScore" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditScoreDto" parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+                SELECT
+                    ICS_ID creditId,
+                    NVL(ICI_ID,0) zxId,
+                    NVL(IGJJ_ID,0) gjjId,
+                    NVL(ISI_ID,0) sbId,
+                    ICC_ID xykId,
+                    NVL(ICS_UPDATE_COUNT,0) updateCount,
+                    TO_CHAR(CCS_UPDATE_TIME, 'YYYY-MM-DD' ) updateDate,
+                    CCS_ADD_TIME addTime,
+                    ICS_SCORE creditScores,
+                    CCS_USERID userId,
+                    ICS_LEVEL_CODE levelCode,
+                    CCS_LEVEL_NAME levelName,
+                    ICS_PRIVILEGE_COUNT privilegeCount
+                FROM TB_ZX_CREDIT_SCORE
+                WHERE CCS_USERID=#{cuserId,jdbcType=VARCHAR}
+                AND   CCS_STATUS = '1'
+    </select>
+    <update id="updateScore"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+                UPDATE TB_ZX_CREDIT_SCORE
+                SET ICS_SCORE = (
+                    (
+                        SELECT
+                            ICS_SCORE
+                        FROM
+                            TB_ZX_CREDIT_SCORE
+                        WHERE CCS_USERID=#{cuserId,jdbcType=VARCHAR}
+                    )+(
+                        SELECT
+                            IR_VALUE
+                        FROM
+                            TB_RULES
+                        WHERE
+                            IR_CODE=#{ruleCode,jdbcType=VARCHAR }
+                    )
+                ),
+                 ICS_UPDATE_TIME = SYSDATE
+                WHERE
+                    CCS_USERID = #{cuserId,jdbcType=VARCHAR }
+    </update>
+    <update id="insertMonthScore"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+                INSERT INTO TB_ZX_MONTH_SCORE (
+                    IMS_ID,
+                    ICS_ID,
+                    CMS_MONTH,
+                    IMS_SCORE
+                )
+                VALUES
+                    (
+                        SEQ_MONTH_SCOREID.NEXTVAL,
+                        #{creditId,jdbcType = INTEGER },
+                        TO_CHAR(SYSDATE, 'YYYYMM' ),
+                        #{creditScores,jdbcType = INTEGER }
+                    )
+    </update>
+    <update id="updateMonthScore"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+                UPDATE TB_ZX_MONTH_SCORE
+                SET IMS_SCORE = #{creditScores,jdbcType = INTEGER }
+                WHERE
+                    ICS_ID = #{creditId,jdbcType = INTEGER }
+                AND CMS_MONTH = TO_CHAR(SYSDATE, 'YYYYMM' )
+    </update>
+    <update id="insertCreditScoreFlow" parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+                INSERT INTO TB_ZX_CREDIT_SCORE_FLOW (
+                    CF_ID,
+                    CF_UPDATE_TIME,
+                    IF_SCORE,
+                    CF_CODE,
+                    IMS_ID,
+                    CF_DESC
+                )
+                VALUES
+                    (
+                        SEQ_CREDIT_SCORE_FLOWID.NEXTVAL,
+                        SYSDATE,
+                        #{creditScores,jdbcType = INTEGER },
+                        #{creditId,jdbcType = INTEGER },
+                        (
+                            SELECT
+                                IMS_ID
+                            FROM
+                                TB_ZX_MONTH_SCORE
+                            WHERE
+                                ICS_ID = #{creditId,jdbcType = INTEGER }
+                            AND CMS_MONTH = TO_CHAR(SYSDATE, 'YYYYMM' )
+                        ),
+                        #{flowDesc,jdbcType = VARCHAR}
+                    )
+    </update>
+    <select id="queryCreditPrivilege" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditPrivilegeDto" parameterType="int">
+        SELECT
+        PIC_URL imageUrl,
+        ACTION_TYPE actionType,
+        IORDER privilegeOrder,
+        PARAM01 param01,
+        PARAM02 param02,
+        TITLE title
+        FROM TB_HOME_PAGE
+        WHERE SCORE_LEVEL =#{levelCode,jdbcType=INTEGER}
+        AND IS_DEL = '0'
+        AND IS_HIDDEN = '0'
+        AND TYPE = 'ZXPRIVILEGE'
+        order by iorder desc
+    </select>
+    <select id="queryCreditInvestigation" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditInvestigationDto" parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+        SELECT * FROM(
+            SELECT
+                CASE WHEN A.ICREDITCC >0 THEN 1 ELSE 0 END AS isCard,
+                CASE WHEN A.ILOANC >0 THEN 1 ELSE 0 END AS isLoan,
+                CASE WHEN A.ICREDITCO >0 OR A.ICREDITCSO >0 OR A.ILOANO >0 OR A.ILOANSO >0 THEN 0 ELSE 1 END AS isOverStay
+            FROM TB_CREDIT_REFERENCE A,TB_ZX_ACCOUNT B
+            WHERE B.CUSERID = #{cuserId,jdbcType=VARCHAR }
+            AND A.CLOGINNAME = B.CLOGINNAME
+            ORDER BY CREPORTDATE DESC
+        )WHERE ROWNUM=1
+    </select>
+    <insert id="insertCreditInvestigation"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditInvestigationBean">
+        <selectKey resultType="int" keyProperty="creditInvestigationId" order="BEFORE">
+            SELECT  SEQ_ZX_CREDIT_INVESTIGATION_ID.NEXTVAL AS creditInvestigationId FROM DUAL
+        </selectKey>
+        INSERT INTO TB_ZX_CREDIT_INVESTIGATION (
+        ICI_ID,
+        CCI_ADD_TIME,
+        CCI_UPDATE_TIME,
+        CCI_TITLE,
+        CCI_STATUS,
+        ICI_IS_OVERSTAY,
+        ICI_IS_CARD,
+        ICI_IS_LOAN
+        )
+        VALUES
+        (
+        #{creditInvestigationId,jdbcType = INTEGER },
+        SYSDATE,
+        SYSDATE,
+        #{title,jdbcType = INTEGER },
+        #{status,jdbcType=VARCHAR },
+        #{isOverStay,jdbcType = INTEGER },
+        #{isCard,jdbcType = INTEGER },
+        #{isLoan,jdbcType = INTEGER }
+        )
+    </insert>
+    <update id="updateCreditInvestigation"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditInvestigationBean">
+       UPDATE TB_ZX_CREDIT_INVESTIGATION
+                SET CCI_UPDATE_TIME = SYSDATE,
+                     CCI_TITLE = #{title,jdbcType = INTEGER },
+                     CCI_STATUS = #{status,jdbcType = INTEGER },
+                     ICI_IS_OVERSTAY = #{isOverStay,jdbcType = INTEGER },
+                     ICI_IS_CARD = #{isCard,jdbcType = INTEGER },
+                     ICI_IS_LOAN = #{isLoan,jdbcType = INTEGER }
+                WHERE
+                    ICI_ID = #{creditInvestigationId,jdbcType = INTEGER }
+    </update>
+
+    <select id="queryBankBill" resultType="com.caiyi.financial.nirvana.ccard.investigation.dto.CreditCardDto" parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+        SELECT
+			DISTINCT
+			ibillid billId,
+			CNAME account,
+			NVL(ISHOULDREPAYMENT,0) shouldPayment,
+			NVL(ITOTALQUOTA,0) totalNum
+            FROM TB_BANK_BILL
+            WHERE CUSERID = #{cuserId,jdbcType=VARCHAR }
+            AND ISDEL = 0
+    </select>
+    <update id="insertCreditCard"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditCardBean">
+        <selectKey resultType="int" keyProperty="creditCardId" order="BEFORE">
+            SELECT  SEQ_ZX_CREDIT_CARD_ID.NEXTVAL as creditCardId FROM DUAL
+        </selectKey>
+        INSERT INTO TB_ZX_CREDIT_CARD (
+        ICC_ID,
+        CCC_TITLE,
+        CCC_UPDATE_TIME,
+        CCC_ADD_TIME,
+        CCC_ACCOUNT,
+        ICC_TOTALNUM,
+        ICC_CARDNUM
+        )
+        VALUES
+        (
+        #{creditCardId,jdbcType = INTEGER },
+        #{title,jdbcType = VARCHAR },
+        SYSDATE,
+        SYSDATE,
+        #{account,jdbcType=VARCHAR },
+        #{totalNum,jdbcType = VARCHAR },
+        #{cardNum,jdbcType = VARCHAR}
+        )
+    </update>
+    <update id="updateCreditCard"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditCardBean">
+        UPDATE TB_ZX_CREDIT_CARD
+        SET CCC_UPDATE_TIME = SYSDATE,
+        CCC_TITLE = #{title,jdbcType = VARCHAR },
+        CCC_ACCOUNT = #{account,jdbcType = VARCHAR },
+        ICC_TOTALNUM = #{totalNum,jdbcType = INTEGER }
+        WHERE
+        ICC_ID = #{creditCardId,jdbcType = INTEGER }
+    </update>
+    <update id="insertProvidentFund"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.ProvidentFundBean">
+        <selectKey resultType="int" keyProperty="providentFundId" order="BEFORE">
+            SELECT  SEQ_ZX_GJJ_ID.NEXTVAL AS providentFundId FROM DUAL
+        </selectKey>
+        INSERT INTO TB_ZX_GJJ (
+        IGJJ_ID,
+        CGJJ_TITLE,
+        CGJJ_STATUS,
+        CGJJ_ADD_TIME,
+        CGJJ_UPDATE_TIME,
+        IGJJ_MONTH_NUM,
+        IGJJ_MONTH_TOTAL,
+        CGJJ_LAST_MONTH
+        )
+        VALUES
+        (
+        #{providentFundId,jdbcType=INTEGER},
+        #{title,jdbcType = VARCHAR },
+        #{status,jdbcType = VARCHAR },
+        SYSDATE,
+        SYSDATE,
+        #{mounthNum,jdbcType=VARCHAR },
+        #{mounthTotal,jdbcType = VARCHAR },
+        #{lastUpdateMonth,jdbcType = VARCHAR }
+        )
+    </update>
+    <update id="updateProvidentFund"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.ProvidentFundBean">
+        UPDATE TB_ZX_GJJ
+        SET CGJJ_UPDATE_TIME = SYSDATE,
+        CGJJ_TITLE = #{title,jdbcType = VARCHAR },
+        CGJJ_STATUS = #{status,jdbcType = VARCHAR },
+        IGJJ_MONTH_NUM = #{mounthNum,jdbcType=VARCHAR },
+        IGJJ_MONTH_TOTAL = #{mounthTotal,jdbcType=VARCHAR },
+        CGJJ_LAST_MONTH = #{lastUpdateMonth,jdbcType = INTEGER }
+        WHERE
+        IGJJ_ID = #{providentFundId,jdbcType = INTEGER }
+    </update>
+    <update id="insertSocalInsurance"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.SocialInsuranceBean">
+        <selectKey resultType="int" keyProperty="socialInsuranceId" order="BEFORE">
+            SELECT  SEQ_ZX_SOCIAL_INSURANCE_ID.NEXTVAL AS socialInsuranceId FROM DUAL
+        </selectKey>
+        INSERT INTO TB_ZX_SOCIAL_INSURANCE (
+        ISI_ID,
+        CSI_TITLE,
+        CSI_STATUS,
+        CSI_ADD_TIME,
+        CSI_UPDATE_TIME
+        )
+        VALUES
+        (
+        #{socialInsuranceId,jdbcType=INTEGER},
+        #{title,jdbcType = VARCHAR },
+        #{status,jdbcType = VARCHAR },
+        SYSDATE,
+        SYSDATE
+        )
+    </update>
+    <update id="updateSocalInsurance"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.SocialInsuranceBean">
+        UPDATE TB_ZX_SOCIAL_INSURANCE
+        SET CSI_UPDATE_TIME = SYSDATE,
+        CSI_TITLE = #{title,jdbcType = VARCHAR },
+        CSI_STATUS = #{status,jdbcType = VARCHAR }
+        WHERE
+        ISI_ID = #{socialInsuranceId,jdbcType = INTEGER }
+    </update>
+    <update id="updateCreditScore"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+        UPDATE TB_ZX_CREDIT_SCORE
+        SET ICS_UPDATE_COUNT = ICS_UPDATE_COUNT+1,
+        CCS_UPDATE_TIME = SYSDATE,
+        ICI_ID=#{zxId,jdbcType = INTEGER },
+        ICC_ID=#{xykId,jdbcType = VARCHAR },
+        IGJJ_ID=#{gjjId,jdbcType = INTEGER },
+        ISI_ID = #{sbId,jdbcType = INTEGER },
+        ICS_SCORE = #{creditScores,jdbcType = INTEGER },
+        ICS_LEVEL_CODE = #{levelCode,jdbcType = INTEGER },
+        CCS_LEVEL_NAME = #{levelName,jdbcType = VARCHAR },
+        ICS_COUNT = #{countProject,jdbcType = VARCHAR }
+        WHERE
+        CCS_USERID = #{cuserId,jdbcType=VARCHAR }
+    </update>
+
+    <insert id="insertCreditScore"  parameterType="com.caiyi.financial.nirvana.ccard.investigation.bean.CreditScoreBean">
+        INSERT INTO TB_ZX_CREDIT_SCORE (
+        ICS_ID,
+        ICS_UPDATE_COUNT,
+        CCS_UPDATE_TIME,
+        CCS_ADD_TIME,
+        CCS_USERID,
+        CCS_STATUS,
+
+        ICI_ID,
+        ICC_ID,
+        IGJJ_ID,
+        ISI_ID,
+
+        ICS_SCORE,
+        ICS_LEVEL_CODE,
+        CCS_LEVEL_NAME,
+        ICS_COUNT
+        )
+        VALUES
+        (
+        SEQ_CREDIT_SCOREID.NEXTVAL,
+        #{updateCount,jdbcType = INTEGER },
+        SYSDATE,
+        SYSDATE,
+        #{cuserId,jdbcType=VARCHAR },
+        1,
+
+        #{zxId,jdbcType = INTEGER },
+        #{xykId,jdbcType = VARCHAR },
+        #{gjjId,jdbcType = INTEGER },
+        #{sbId,jdbcType = INTEGER },
+
+        #{creditScores,jdbcType = INTEGER },
+        #{levelCode,jdbcType = INTEGER },
+        #{levelName,jdbcType = VARCHAR },
+        #{countProject,jdbcType = VARCHAR }
+        )
+    </insert>
+</mapper>

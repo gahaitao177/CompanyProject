@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.ccardinfo.mapper.CardYoyuMapper">
+
+    <select id="queryWelfare" resultType="map">
+        select s1.* from (
+        select  t1.ctitle as title,t1.ccontent as content,t1.cpicUrl as picUrl,t1.curl as webUrl
+        from tb_special_preferential t1
+        where is_hidden=0 and is_del=0
+       and (citycodes like '%'||#{adcode,jdbcType=VARCHAR}||'%' OR  citycodes='all') order by t1.iorder desc,t1.preferentialid desc )s1 where rownum <![CDATA[<]]> 9
+    </select>
+
+    <select id="queryWelfare2" resultType="map">
+        select s1.*
+        from (select t1.ctitle   as title,
+        t1.ccontent as content,
+        t1.cpicUrl  as picUrl,
+        t1.curl     as webUrl
+        from tb_special_preferential t1
+        where is_hidden = 0
+        and is_del = 0
+        and (citycodes like '%'||#{adcode,jdbcType=VARCHAR}||'%' OR  citycodes='all')
+        and (ibankid = 'all'
+        <foreach collection="bankIds" index="bankId" item="item">
+            OR instr(ibankid,','||#{item}||',')>0
+        </foreach>
+        )
+        order by t1.iorder desc, t1.preferentialid desc) s1
+        where rownum <![CDATA[<]]> 9
+    </select>
+
+
+    <select id="queryTopOneCard" resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.RankCard">
+        select s1.*,rownum as rank from (
+        select tha.ranktitle as rankTitle,tba.icardid as cardId,tba.ccardname as cardName, tha.cpicurl as picUrl,tha.creason1 as reason1,tha.creason2 as reason2,tha.cardurl
+        from tb_home_activity tha,tb_bank_card tba,tb_city_bank tcb
+        where tha.contentsub_title = tba.icardid
+        and tba.ibankid = tcb.ibankid
+        and tcb.iareaid = #{cityid,jdbcType=VARCHAR}
+        and tba.istate =1
+        and tha.is_del=0
+        and tha.ihatype=1
+        and tha.is_hidden=0
+        order by tha.iorder desc,tba.ishot desc,tba.iorder desc,tba.iapplicationnum desc,tba.icardid) s1
+        where rownum <![CDATA[<]]> 2
+
+</select>
+
+    <select id="queryTopTenCards" resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.bean.RankCard">
+        select s1.*,rownum as rank from (
+        select tha.ranktitle as rankTitle,tba.icardid as cardId,tba.ccardname as cardName, tba.ccardimg as picUrl,tha.creason1 as reason1,tha.creason2 as reason2
+        from tb_home_activity tha,tb_bank_card tba,tb_city_bank tcb
+        where tha.contentsub_title = tba.icardid
+        and tba.ibankid = tcb.ibankid
+        and tcb.iareaid = #{cityid,jdbcType=VARCHAR}
+        and tba.istate =1
+        and tha.is_del=0
+        and tha.ihatype=1
+        and tha.is_hidden=0
+        order by tha.iorder desc,tba.ishot desc,tba.iorder desc,tba.iapplicationnum desc,tba.icardid) s1
+    </select>
+
+    <insert id="saveBankCallBackInfo">
+        INSERT  INTO tb_youyu_bank_callback (icallbackid,ibankid,cadid,corderid,ctime,istate)
+        VALUES (seq_youyu_bank_callback.nextval,#{bankid,jdbcType=VARCHAR},#{adid,jdbcType=VARCHAR},
+        #{orderid,jdbcType=VARCHAR},#{time,jdbcType=INTEGER},#{state,jdbcType=INTEGER})
+    </insert>
+
+    <select id="queryCallBackInfo" resultType="map">
+        select count(1) nums from tb_youyu_bank_callback tbc where  tbc.ibankid =  #{bankid,jdbcType=VARCHAR} and tbc.corderid = #{orderid,jdbcType=VARCHAR}
+    </select>
+
+
+    <select id="queryQuickInfo" resultType="map" parameterType="map">
+      select * from tb_home_page t where is_hidden=0 and is_del=0 and ( city_code = 'all' or city_code like #{cityid,jdbcType=VARCHAR}) and t.type = #{type,jdbcType=VARCHAR} order by iorder desc,pageid desc
+    </select>
+    <select id="queryCardRecommendConfig" resultType="map" parameterType="map">
+      select t.ctitle,t.csubtitle,t.cpicurl,t.icardid from  tb_topic t where t.idelflag = 1 and t.iexpire = 1 and t.itype =2 order by t.itopicid desc
+    </select>
+
+    <select id="queryApplyCards" resultType="map" parameterType="map">
+      select tbc.icardid,tbc.ccardname,tbc.ccardimg from tb_bank_card tbc,tb_city_bank tcb where tbc.ibankid = tcb.ibankid
+        <choose>
+            <when test="cityid !=null">
+                and tcb.iareaid = #{cityid,jdbcType=VARCHAR}
+            </when>
+            <otherwise>
+                and tcb.iareaid = -1
+            </otherwise>
+        </choose>
+         and instr(#{cardids,jdbcType=VARCHAR},','|| tbc.icardid || ',') >0 and tbc.istate =1 order by icardid
+    </select>
+
+    <select id="getBankIconById" resultType="map" parameterType="map">
+        select t.cbankicon from tb_handle_credit t where t.ibankid =  #{bankid,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryBankIdByUserId" resultType="Integer">
+        select ibankid from tb_user_bank where cnickid = #{userId}
+    </select>
+
+</mapper>

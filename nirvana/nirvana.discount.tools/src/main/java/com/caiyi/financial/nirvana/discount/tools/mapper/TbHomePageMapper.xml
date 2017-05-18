@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.tools.mapper.TbHomePageMapper">
+
+    <select id="selectHomePage" parameterType="map" resultType="com.caiyi.financial.nirvana.discount.tools.dto.TbHomePageDto">
+        SELECT
+          type,
+          title,
+          pic_url picUrl,
+          action_type actionType,
+          sub_title subTitle,
+          param01,
+          param02
+        FROM
+         tb_home_page
+        WHERE
+          is_hidden=0
+        AND
+          is_del=0
+        AND
+          (city_code='all' or city_code LIKE #{0})
+        AND
+          type=#{1}
+        ORDER BY  iorder desc
+    </select>
+
+</mapper>

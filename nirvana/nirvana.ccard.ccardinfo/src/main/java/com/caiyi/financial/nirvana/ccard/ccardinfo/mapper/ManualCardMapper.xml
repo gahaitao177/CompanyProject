@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.ccard.ccardinfo.mapper.ManualCardMapper">
+
+    <select id="updateRegisterSendYZM" parameterMap="registerSendYZM"  statementType="CALLABLE" resultType="map">
+        CALL cpuser.sp_user_mobregister_send_yzm(?,?,?,?,?,?)
+    </select>
+    <parameterMap id="registerSendYZM" type="java.util.Map" >
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="ipAddr" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="registerCheckYZM" parameterMap="registerCheckYZMPara"  statementType="CALLABLE" resultType="map">
+    CALL cpuser.sp_user_mobregister_check_yzm(?,?,?,?,?)
+    </select>
+    <parameterMap id="registerCheckYZMPara" type="java.util.Map" >
+        <parameter property="mobileNo" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzm" mode="IN" jdbcType="VARCHAR"/>
+        <parameter property="yzmType" mode="IN" jdbcType="VARCHAR"/>
+
+        <parameter property="busiErrCode" mode="OUT" jdbcType="VARCHAR"/>
+        <parameter property="busiErrDesc" mode="OUT" jdbcType="VARCHAR"/>
+    </parameterMap>
+
+    <select id="queryChannels"  parameterType="string" resultType="com.caiyi.financial.nirvana.ccard.ccardinfo.dto.ChannelDao">
+       select distinct ichannelid id ,cchannel_name name,icontent_number contentNumber from tb_channel
+       <if test="ichannelid!=null">
+           where ichannelid = #{ichannelid,jdbcType=VARCHAR}
+       </if>
+    </select>
+
+</mapper>

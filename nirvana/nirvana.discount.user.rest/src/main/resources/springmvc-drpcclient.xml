@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+
+
+    <beans profile="localdev">
+        <bean name="hskCcard hskUser hskBillBank hskBillMail hskCcardInfo hskCInvestigation hskCardMaterial hskTool hskLoan" class="com.caiyi.financial.nirvana.core.client.LocalDrpcClient"></bean>
+    </beans>
+    <beans profile="remotetest prd">
+        <bean id="drpcPooledObjectFactory" class="com.caiyi.financial.nirvana.core.client.pool.DrpcClientKeyedFactory">
+            <constructor-arg >
+                <map key-type="java.lang.String" value-type="java.lang.Object">
+                    <entry key="drpcIp" value="${drpc.drpcIp}"></entry>
+                    <entry key="drpcPort" value="${drpc.drpcPort}"></entry>
+                    <entry key="timeout" value="${drpc.timeout}"></entry>
+                    <!--<entry key="servers">-->
+                        <!--<list>-->
+                            <!--<value>192.168.1.207:3772</value>-->
+                            <!--<value>192.168.1.207:3772</value>-->
+                        <!--</list>-->
+                    <!--</entry>-->
+                    <entry key="storm.thrift.transport" value="${drpc.storm.thrift.transport}"></entry>
+                    <entry key="storm.nimbus.retry.times" value="${drpc.storm.nimbus.retry.times}"></entry>
+                    <entry key="storm.nimbus.retry.interval.millis" value="${drpc.storm.nimbus.retry.interval.millis}"></entry>
+                    <entry key="storm.nimbus.retry.intervalceiling.millis" value="${drpc.storm.nimbus.retry.intervalceiling.millis}"></entry>
+                    <entry key="drpc.max_buffer_size" value="${drpc.drpc.max_buffer_size}"></entry>
+                </map>
+            </constructor-arg>
+        </bean>
+
+        <bean id="poolConf" class="org.apache.commons.pool2.impl.GenericKeyedObjectPoolConfig">
+            <property name="maxIdlePerKey" value="${drpc.maxIdlePerKey}"></property>
+            <property name="minIdlePerKey" value="${drpc.minIdlePerKey}"></property>
+            <property name="maxTotal" value="${drpc.maxTotal}"></property>
+            <property name="timeBetweenEvictionRunsMillis" value="${drpc.timeBetweenEvictionRunsMillis}"></property>
+            <property name="maxWaitMillis" value="${drpc.maxWaitMillis}"></property>
+        </bean>
+        <bean id="clientPool" class="org.apache.commons.pool2.impl.GenericKeyedObjectPool">
+            <constructor-arg ref="drpcPooledObjectFactory"></constructor-arg>
+            <constructor-arg ref="poolConf"></constructor-arg>
+        </bean>
+
+        <bean name="hskCcard" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskCcard"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+
+        <bean name="hskUser" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskUser"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskBillBank" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskBillBank"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskBillMail" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskBillMail"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskCcardInfo" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskCcardInfo"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskCInvestigation" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskCInvestigation"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskCardMaterial" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskCardMaterial"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskTool" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskTool"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+        <bean name="hskLoan" class="com.caiyi.financial.nirvana.core.client.pool.RemotePooledObjectDrpcClientImpl">
+            <property name="drpcService" value="hskLoan"></property>
+            <property name="pool" ref="clientPool"></property>
+        </bean>
+    </beans>
+
+    <!-- 远程测试配置drpc client pool
+
+    -->
+
+</beans>

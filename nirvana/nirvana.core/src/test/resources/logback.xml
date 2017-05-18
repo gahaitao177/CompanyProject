@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds" debug="false">
+    <property name="APP_Name" value="discount"/>
+    <property name="catalina.home" value="/data/logs/nirvana/discount"/>
+    <contextName>${APP_Name}</contextName>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>${catalina.home}/logs/loanweb.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ROLL_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${catalina.home}/logs/ROLL_FILE/log.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg %n
+            </pattern>
+        </encoder>
+    </appender>
+
+
+    <!--fileName="${sys:storm.log.dir}/${APP_Name}.log"-->
+    <RollingFile name="loanweb"
+                 fileName="${catalina.home}/${APP_Name}.log"
+                 filePattern="${catalina.home}/${sys:logfile.name}.%i.gz">
+        <PatternLayout>
+            <pattern>${pattern}</pattern>
+        </PatternLayout>
+        <Policies>
+            <SizeBasedTriggeringPolicy size="100 MB"/>
+            <!-- Or every 100 MB -->
+        </Policies>
+        <DefaultRolloverStrategy max="9"/>
+    </RollingFile>
+
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.caiyi" addtivity="false" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="backtype.storm" level="INFO"/>
+    <logger name="org.apache.storm.logging" level="ERROR"/>
+    <logger name="org.apache.zookeeper" level="INFO"/>
+    <logger name="com.alibaba" level="WARN"/>
+    <logger name="com.alibaba.druid" level="WARN">
+        <appender-ref ref="STDOUT"/>
+    </logger>
+</configuration>

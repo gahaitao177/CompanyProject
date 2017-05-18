@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.caiyi.financial.nirvana.discount.user.mapper.HskUserMapper">
+    <insert id="insertUserInfo" parameterType="com.caiyi.financial.nirvana.discount.user.bean.User">
+        insert into tb_user
+        (cnickid,cpassword,cpwd9188,cusername,cphone,cregisterdate,cregip,imobbind,cuserid,isource,crealname,cidcard,itype,cimei)
+        values(
+        #{uid,jdbcType=VARCHAR},
+        #{pwd,jdbcType=VARCHAR},
+        #{pwd9188,jdbcType=VARCHAR},
+        #{cusername,jdbcType=VARCHAR},
+        #{mobileNo,jdbcType=VARCHAR},
+        sysdate,
+        #{ipAddr,jdbcType=VARCHAR},
+        #{imobbind,jdbcType=INTEGER},
+        #{cuserId,jdbcType=VARCHAR},
+        #{source,jdbcType=VARCHAR},
+        #{realname,jdbcType=VARCHAR},
+        #{idcard,jdbcType=VARCHAR},
+        #{userType,jdbcType=INTEGER},
+        #{cimei,jdbcType=VARCHAR} )
+    </insert>
+
+    <insert id="insertUserSource" parameterType="com.caiyi.financial.nirvana.discount.user.bean.User">
+        insert into tb_user_source
+        (cuserid, cappmgr, ccityid, cidfa)
+        values(
+        #{cuserId,jdbcType=VARCHAR},
+        #{appMgr,jdbcType=INTEGER},
+        #{hskcityid,jdbcType=VARCHAR},
+        #{cidfa,jdbcType=VARCHAR})
+    </insert>
+
+    <select id="queryToken" parameterType="com.caiyi.financial.nirvana.discount.user.bean.HskUserBean"
+            resultType="com.caiyi.financial.nirvana.discount.user.dto.TokenDto">
+        select t.cuserid cuserId, t.accesstoken accessToken, t.appid appid
+        from tb_token t
+        where t.accesstoken = #{token, jdbcType = VARCHAR}
+        and t.appid = #{appId, jdbcType = VARCHAR}
+    </select>
+
+    <select id="queryUserByCuserId" resultType="com.caiyi.financial.nirvana.discount.user.dto.UserDto">
+        select t.cuserid cuserId, t.cpassword pwd, t.cpwd9188 pwd9188
+        from tb_user t
+        where t.cuserid = #{cuserId, jdbcType = VARCHAR }
+    </select>
+
+    <update id="bindIcon" parameterType="com.caiyi.financial.nirvana.discount.user.bean.HskUserBean">
+        update tb_user
+        set CTINYURL = #{icon, jdbcType = VARCHAR }
+        where CUSERID = #{cuserId,jdbcType = VARCHAR}
+        and (CPASSWORD = #{pwd, jdbcType = VARCHAR } or cpwd9188 = #{pwd9188,jdbcType = VARCHAR })
+    </update>
+</mapper>
