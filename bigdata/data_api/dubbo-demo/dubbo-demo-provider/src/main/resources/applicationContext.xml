@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+    <dubbo:application name="youyu_provider"/>
+
+    <dubbo:registry address="zookeeper://10.0.12.14:2181?backup=10.0.12.15:2181,10.0.12.16:2181"/>
+
+    <dubbo:protocol name="dubbo" port="20880"/>
+
+    <dubbo:service interface="com.youyu.demo.api.Provider" ref="demoService"/>
+    <bean id="demoService" class="com.youyu.demo.provider.ProviderImpl"/>
+
+    <dubbo:provider cluster="failover" retries="3" filter="catTransaction,appnameAppend"/>
+</beans>
