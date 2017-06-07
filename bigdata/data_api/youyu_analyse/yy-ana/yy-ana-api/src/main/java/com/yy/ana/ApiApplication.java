@@ -39,6 +39,7 @@ public class ApiApplication extends SpringBootServletInitializer implements Embe
         registration.addUrlPatterns("/*");
         registration.setName("catFilter");
         return registration;
+
     }
 
 }

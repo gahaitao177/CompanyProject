@@ -11,8 +11,9 @@ public class BaseAction {
     protected Map<String, Object> getReturnObject(HttpServletResponse response) {
         response.setContentType("text/html;charset=UTF-8");
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("ret", "0");
+        map.put("ret", 0);
 
         return map;
     }
+
 }

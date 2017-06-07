@@ -20,7 +20,7 @@ import scala.collection.mutable
   */
 object AppKafkaSparkStats {
   def main(args: Array[String]): Unit = {
-
+    val todayDate: Date = new Date
     //设置切片时间长度，如果提交时不指定切片长度，默认是5秒钟
     val slices = if (args.length > 0) args(0).toLong else 5L
 
@@ -29,6 +29,8 @@ object AppKafkaSparkStats {
     val sparkConf = new SparkConf().setAppName(Constants.SPARK_APP_NAME)
     //sparkConf.set("spark.default.parallelism", "10")
     val scc = new StreamingContext(sparkConf, Durations.seconds(slices))
+
+    val broadCastTodayDate = scc.sparkContext.broadcast(DateUtils.getDate(todayDate))
 
     val topic = Set("youyu_mobile_data_after_etl")
 
@@ -39,6 +41,10 @@ object AppKafkaSparkStats {
     val jsonDStream = stream.flatMap(line => {
       val data = JSON.parseObject(line._2)
       Some(data)
+    }).filter(jsonObject => {
+      //获取当前数据上报的时间，如果上报的时间不在当前天内，则过滤掉
+      val reportDate = jsonObject.getString("reportTime").substring(0, 10)
+      reportDate == broadCastTodayDate.value
     })
 
     //用户字典数据维护
@@ -66,13 +72,8 @@ object AppKafkaSparkStats {
   def activeUserCount(reports: DStream[JSONObject], scc: StreamingContext) = {
     val date: Date = new Date
 
-    //获取当前时间
-    val currentTime = DateUtils.getLastDay(date, 0)
     //获取当前时间前两天的时间
-    val lastTwoDayTime = DateUtils.getLastDay(date, -2).substring(0, 10)
-
-    //获取当前时间所属的小时
-    val currentHour = DateUtils.splitDate(currentTime)("hour")
+    val yesterday = DateUtils.getLastDay(date, -1).substring(0, 10)
 
     val active_user_stat_day = ConfigurationManager.getProperty(Constants.HBASE_APP_DATA_DAILY)
     val broadcastActiveUserStat = scc.sparkContext.broadcast(active_user_stat_day)
@@ -90,7 +91,7 @@ object AppKafkaSparkStats {
         partitionOfRecords.foreach(x => {
           val userStatTable = connection.getTable(TableName.valueOf(broadcastActiveUserStat.value))
 
-          val reportTime = x.getString("reportTime").substring(0, 10)
+          val reportDate = x.getString("reportTime").substring(0, 10)
           val hourCode = x.getString("reportTime").substring(11, 13)
           val appKey = x.getString("appKey")
           val pkg = x.getString("pkgId")
@@ -99,32 +100,32 @@ object AppKafkaSparkStats {
           val clientMd5 = x.getString("clientIdMd5")
 
           val activeUserType = "active_user"
-          val userStatRowKey = appKey + "#" + activeUserType + "#" + reportTime + "#" + pkg + "#" + version + "#" + channel
+          val userStatRowKey = appKey + "#" + activeUserType + "#" + reportDate + "#" + pkg + "#" + version + "#" + channel
           val userHourMapKey = appKey + "#" + pkg + "#" + clientMd5 + "#" + hourCode
 
           try {
             //判断当前时间Key是否在广播变量中
-            val flag = broadcastUserHourMap.value.contains(reportTime)
+            val hourFlag = broadcastUserHourMap.value.contains(reportDate)
 
             //以小时为级别进行对用户的唯一性进行判断来统计活跃用户
-            if (!flag) {
+            if (!hourFlag) {
               //当前用户作为当前时间段内的活跃用户+1
               HbaseUtil.incrementColumnValues(userStatTable, userStatRowKey, "data", hourCode, 1L)
 
               val valueMap = mutable.Map[String, Int]()
               valueMap += (userHourMapKey -> 1)
 
-              broadcastUserHourMap.value += (reportTime -> valueMap)
+              broadcastUserHourMap.value += (reportDate -> valueMap)
 
               //如果判断当前跨天了，那就将前天内存中的数据进行清空处理
               for (k <- broadcastUserHourMap.value.keySet.toArray) {
-                if (k.compareToIgnoreCase(lastTwoDayTime) <= 0) {
+                if (k.compareToIgnoreCase(yesterday) <= 0) {
                   broadcastUserHourMap.value.remove(k)
                 }
               }
             } else {
               //获取当前时间key对应的value值Map
-              val valueMap = broadcastUserHourMap.value(reportTime)
+              val valueMap = broadcastUserHourMap.value(reportDate)
               val existKey = valueMap.contains(userHourMapKey)
               if (!existKey) {
                 //当前用户作为当前时间段内的活跃用户+1
@@ -137,11 +138,13 @@ object AppKafkaSparkStats {
             }
 
             val activeUserUniqType = "active_user_uniq"
-            val userDayRowKey = appKey + "#" + activeUserUniqType + "#" + reportTime + "#" + pkg + "#" + version + "#" + channel
+            val userDayRowKey = appKey + "#" + activeUserUniqType + "#" + reportDate + "#" + pkg + "#" + version + "#" + channel
             val userDayMapKey = userHourMapKey.substring(0, userHourMapKey.length - 3)
 
+            val dayFlag = broadcastUserDayMap.value.contains(reportDate)
+
             //以天为级别进行对用户的唯一性进行判断来统计活跃用户
-            if (!flag) {
+            if (!dayFlag) {
               //当前用户作为当前时间段内的活跃用户+1
               HbaseUtil.incrementColumnValues(userStatTable, userDayRowKey, "data", hourCode, 1L)
               //天活跃数据+1
@@ -150,18 +153,18 @@ object AppKafkaSparkStats {
               val valueMap = mutable.Map[String, Int]()
               valueMap += (userDayMapKey -> 1)
 
-              broadcastUserDayMap.value += (reportTime -> valueMap)
+              broadcastUserDayMap.value += (reportDate -> valueMap)
 
               //如果判断当前跨天了，那就将前天内存中的数据进行清空处理
               for (k <- broadcastUserDayMap.value.keySet.toArray) {
-                if (k.compareToIgnoreCase(lastTwoDayTime) <= 0) {
+                if (k.compareToIgnoreCase(yesterday) <= 0) {
                   broadcastUserDayMap.value.remove(k)
                 }
               }
 
             } else {
               //获取当前时间key对应的value值Map
-              val valueMap = broadcastUserDayMap.value(reportTime)
+              val valueMap = broadcastUserDayMap.value(reportDate)
               val existKey = valueMap.contains(userDayMapKey)
               if (!existKey) {
                 //当前用户作为当前时间段内的活跃用户+1

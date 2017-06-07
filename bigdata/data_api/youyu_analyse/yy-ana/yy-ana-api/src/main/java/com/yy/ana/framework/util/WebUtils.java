@@ -37,4 +37,21 @@ public class WebUtils {
 
         return dto;
     }
+
+    public static boolean checkProperties(Map dto, String... properties) {
+        for (String property : properties) {
+            if (!checkProperty(dto, property)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean checkProperty(Map dto, String property) {
+        if (dto.get(property) == null || "".equals(((String) dto.get(property)).trim())) {
+            return false;
+        }
+        return true;
+    }
 }

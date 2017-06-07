@@ -38,6 +38,16 @@ public class DateUtil {
         return dateString;
     }
 
+    public static Date parseString2Date(String str, String format) throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        return sdf.parse(str);
+    }
+
+    public static Date parseString2Date(String str) throws Exception {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        return sdf.parse(str);
+    }
+
     /**
      * 将日期字符串转换成指定格式的日期
      *

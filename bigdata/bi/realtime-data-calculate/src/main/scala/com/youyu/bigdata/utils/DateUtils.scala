@@ -22,6 +22,15 @@ object DateUtils extends Serializable {
   }
 
   /**
+    * @param date
+    * @return 返回<yyyy-MM-dd> 格式的时间
+    */
+  def getDate(date: Date): String = {
+    val result = DATE_FORMAT.format(date)
+    result
+  }
+
+  /**
     * 解析时间字符串
     *
     * @param time 时间字符串 <yyyy-MM-dd HH:mm:ss>

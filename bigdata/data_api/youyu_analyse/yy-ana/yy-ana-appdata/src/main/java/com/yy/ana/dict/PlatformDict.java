@@ -59,4 +59,13 @@ public class PlatformDict {
         }
         return "";
     }
+
+    public static String getAppName(String key) {
+        for (Dto dto : platformList) {
+            if (key.equals(dto.getAsString("key"))) {
+                return dto.getAsString("app_name");
+            }
+        }
+        return "";
+    }
 }
