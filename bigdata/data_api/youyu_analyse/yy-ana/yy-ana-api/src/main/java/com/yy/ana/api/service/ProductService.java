@@ -28,11 +28,12 @@ public class ProductService {
 
     /**
      * @param distinguishPlatform
-     * @param day
+     * @param date
+     * @param products
      * @return
      * @throws Exception
      */
-    public List<Dto> getProductsTotalData(boolean distinguishPlatform, String day) throws Exception {
-        return appdataService.getProductsTotalData(distinguishPlatform, day);
+    public List<Dto> getProductsTotalData(boolean distinguishPlatform, String date, String products) throws Exception {
+        return appdataService.getProductsTotalData(distinguishPlatform, date, products);
     }
 }

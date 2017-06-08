@@ -20,7 +20,6 @@ import scala.collection.mutable
   */
 object AppKafkaSparkStats {
   def main(args: Array[String]): Unit = {
-    val todayDate: Date = new Date
     //设置切片时间长度，如果提交时不指定切片长度，默认是5秒钟
     val slices = if (args.length > 0) args(0).toLong else 5L
 
@@ -30,7 +29,6 @@ object AppKafkaSparkStats {
     //sparkConf.set("spark.default.parallelism", "10")
     val scc = new StreamingContext(sparkConf, Durations.seconds(slices))
 
-    val broadCastTodayDate = scc.sparkContext.broadcast(DateUtils.getDate(todayDate))
 
     val topic = Set("youyu_mobile_data_after_etl")
 
@@ -44,7 +42,9 @@ object AppKafkaSparkStats {
     }).filter(jsonObject => {
       //获取当前数据上报的时间，如果上报的时间不在当前天内，则过滤掉
       val reportDate = jsonObject.getString("reportTime").substring(0, 10)
-      reportDate == broadCastTodayDate.value
+      val todayDate: Date = new Date
+      val todayDateStr = DateUtils.getDate(todayDate)
+      reportDate == todayDateStr
     })
 
     //用户字典数据维护
@@ -70,11 +70,6 @@ object AppKafkaSparkStats {
     * @param scc
     */
   def activeUserCount(reports: DStream[JSONObject], scc: StreamingContext) = {
-    val date: Date = new Date
-
-    //获取当前时间前两天的时间
-    val yesterday = DateUtils.getLastDay(date, -1).substring(0, 10)
-
     val active_user_stat_day = ConfigurationManager.getProperty(Constants.HBASE_APP_DATA_DAILY)
     val broadcastActiveUserStat = scc.sparkContext.broadcast(active_user_stat_day)
 
@@ -87,6 +82,10 @@ object AppKafkaSparkStats {
       rdd.foreachPartition(partitionOfRecords => {
         //获取hbase连接connection
         val connection = HbaseUtil.getHbaseConn
+
+        //获取当前时间前一天的时间
+        val date: Date = new Date
+        val yesterday = DateUtils.getLastDay(date, -1).substring(0, 10)
 
         partitionOfRecords.foreach(x => {
           val userStatTable = connection.getTable(TableName.valueOf(broadcastActiveUserStat.value))

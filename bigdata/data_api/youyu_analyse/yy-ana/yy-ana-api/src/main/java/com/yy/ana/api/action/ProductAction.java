@@ -22,14 +22,21 @@ public class ProductAction extends BaseAction {
     @Autowired
     private ProductService productService;
 
+    /**
+     * 查询产品数据列表
+     *
+     * @param request
+     * @param response
+     * @return
+     */
     @RequestMapping("/get_product_summary_data")
     @ResponseBody
     public Map<String, Object> getProductsSummaryData(HttpServletRequest request, HttpServletResponse response) {
         Dto params = WebUtils.getPraramsAsDto(request);
         Map<String, Object> result = getReturnObject(response);
-        if (!WebUtils.checkProperties(params, "days")) {
+        if (!WebUtils.checkProperties(params, "date_list")) {
             result.put("ret", 1);
-            result.put("msg", "缺少必要参数: days");
+            result.put("msg", "缺少必要参数: date_list");
             return result;
         }
         //是否区分平台
@@ -42,7 +49,7 @@ public class ProductAction extends BaseAction {
         String products = params.containsKey("products") ? params.getAsString("products") : null;
 
         try {
-            List<Dto> list = productService.getProductSummaryData(distinguishPlatform, params.getAsString("days"), products);
+            List<Dto> list = productService.getProductSummaryData(distinguishPlatform, params.getAsString("date_list"), products);
             result.put("data", list);
         } catch (Exception e) {
             result.put("ret", 1);
@@ -56,9 +63,9 @@ public class ProductAction extends BaseAction {
     public Map<String, Object> getProductsTotalData(HttpServletRequest request, HttpServletResponse response) {
         Dto params = WebUtils.getPraramsAsDto(request);
         Map<String, Object> result = getReturnObject(response);
-        if (!WebUtils.checkProperties(params, "day")) {
+        if (!WebUtils.checkProperties(params, "date")) {
             result.put("ret", 1);
-            result.put("msg", "缺少必要参数: day");
+            result.put("msg", "缺少必要参数: date");
             return result;
         }
         //是否区分平台
@@ -69,7 +76,7 @@ public class ProductAction extends BaseAction {
         }
 
         try {
-            List<Dto> list = productService.getProductsTotalData(distinguishPlatform, params.getAsString("day"));
+            List<Dto> list = productService.getProductsTotalData(distinguishPlatform, params.getAsString("date"), params.containsKey("products") ? params.getAsString("products") : "");
             result.put("data", list);
         } catch (Exception e) {
             result.put("ret", 1);

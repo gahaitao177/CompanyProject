@@ -22,28 +22,129 @@ public class AppdataServiceImpl implements IAppdataService {
     @Reference
     private IHbaseService hbaseService;
 
-    private Dto checkDto(Dto dtoByProductKey, String productKey, String platform, List<Dto> list, String pkg, boolean isDistinPlatform, String day) {
-        if (dtoByProductKey == null) {
-            dtoByProductKey = new BaseDto();
-            dtoByProductKey.put("product_key", productKey);
-            dtoByProductKey.put("platform", platform);
-            dtoByProductKey.put("pkg", pkg);
-            dtoByProductKey.put("new_user", 0l);
-            dtoByProductKey.put("active_user", 0l);
-            dtoByProductKey.put("start_times", 0l);
-            dtoByProductKey.put("today_total", 0l);
-            dtoByProductKey.put("data_date", day);
 
-            if (isDistinPlatform) {
-                dtoByProductKey.put("platform", PlatformDict.getPlatformName(pkg));
-                dtoByProductKey.put("app_name", PlatformDict.getAppName(pkg));
-            }
-            if ((isDistinPlatform && !StringUtils.isEmpty(pkg.trim())) || !isDistinPlatform) {
-                list.add(dtoByProductKey);
-            }
+    /**
+     * 查询产品列表
+     *
+     * @param distinguishPlatform
+     * @param dateList
+     * @param products
+     * @return
+     * @throws Exception
+     */
+    public List<Dto> getProductSummaryData(boolean distinguishPlatform, String dateList, String products) throws Exception {
+        String[] dateArray = dateList.split(",");
 
+        String productAll = "yy_gjj,yy_jz,yy_chexian,yy_ss,jz_new";
+        if (StringUtils.isEmpty(products)) {
+            products = productAll;
+        } else {
+            products = intersectionStr(products, productAll);
         }
-        return dtoByProductKey;
+
+        String dataTypes = "new_user,active_user,start_times";
+        String tableName = "app_data_daily";
+        //平台
+        String platform = "全平台";
+
+        List<Dto> list = new ArrayList<Dto>();
+        for (String day : dateArray) {
+            /**1、查询产品列表并封装成Dto*/
+            List<Dto> dataList = getProductByDate(DateUtil.parseString2Date(day), products, dataTypes, tableName);
+            if (dataList.size() > 0) {
+                for (Dto dto : dataList) {
+                    String productKey = dto.getAsString("key").split("#")[0];
+                    String pkg = dto.getAsString("key").split("#")[3];
+
+                    Dto dtoByProductKey = getDtoByProductKey(list, productKey, pkg, distinguishPlatform, day);
+                    if (dtoByProductKey == null) {
+                        dtoByProductKey = createDto(productKey, platform, pkg, distinguishPlatform, day);
+
+                        //处理pkg为空的情况
+                        if ((distinguishPlatform && !StringUtils.isEmpty(pkg.trim())) || !distinguishPlatform) {
+                            list.add(dtoByProductKey);
+                        }
+                    }
+
+                    List<String> keys = Arrays.asList(dto.getAsString("key").split("#"));
+                    //处理新增用户
+                    if (keys.contains("new_user")) {
+                        dtoByProductKey.put("new_user", dtoByProductKey.getAsLong("new_user") + dto.getAsLong("value"));
+                    }
+                    //处理活跃用户
+                    if (keys.contains("active_user")) {
+                        dtoByProductKey.put("active_user", dtoByProductKey.getAsLong("active_user") + dto.getAsLong("value"));
+                    }
+                    //处理启动次数
+                    if (keys.contains("start_times")) {
+                        dtoByProductKey.put("start_times", dtoByProductKey.getAsLong("start_times") + dto.getAsLong("value"));
+                    }
+                }
+            }
+        }
+
+        /**处理产品名*/
+        return dealProductName(list);
+    }
+
+
+    /**
+     * 查询截止到今天的总数
+     *
+     * @param day
+     * @param distinguishPlatform
+     * @return
+     * @throws Exception
+     */
+    public List<Dto> getProductsTotalData(boolean distinguishPlatform, String day, String products) throws Exception {
+        Date date = DateUtil.parseString2Date(day);
+
+        String productAll = "yy_gjj,yy_jz,yy_chexian,yy_ss,jz_new";
+        if (StringUtils.isEmpty(products)) {
+            products = productAll;
+        } else {
+            products = intersectionStr(products, productAll);
+        }
+
+        String totalType = "total_user";
+        String tableName = "app_data_daily";
+        List<Dto> totalList = getProductByDate(date, products, totalType, tableName);
+
+        List<Dto> list = new ArrayList<Dto>();
+
+        if (totalList.size() > 0) {
+            for (Dto dto : totalList) {
+                Dto dto1 = new BaseDto();
+                dto1.put("product_key", dto.getAsString("key").split("#")[0]);
+                dto1.put("total", dto.getAsLong("value"));
+                dto1.put("platform", PlatformDict.getPlatformName(dto.getAsString("key").split("#")[3]));
+                dto1.put("pkg", dto.getAsString("key").split("#")[3]);
+                dto1.put("app_name", PlatformDict.getAppName(dto.getAsString("key").split("#")[3]));
+                dto1.put("total", dto.getAsLong("value"));
+                list.add(dto1);
+
+            }
+        }
+
+        return list;
+    }
+
+    private Dto createDto(String productKey, String platform, String pkg, boolean isDistinPlatform, String day) {
+        Dto dto = new BaseDto();
+        dto.put("product_key", productKey);
+        dto.put("platform", platform);
+        dto.put("pkg", pkg);
+        dto.put("new_user", 0l);
+        dto.put("active_user", 0l);
+        dto.put("start_times", 0l);
+        dto.put("today_total", 0l);
+        dto.put("data_date", day);
+
+        if (isDistinPlatform) {
+            dto.put("platform", PlatformDict.getPlatformName(pkg));
+            dto.put("app_name", PlatformDict.getAppName(pkg));
+        }
+        return dto;
     }
 
     private Dto getDtoByProductKey(List<Dto> list, String productKey, String pkg, boolean isDistinPlatform, String day) {
@@ -64,6 +165,54 @@ public class AppdataServiceImpl implements IAppdataService {
         return null;
     }
 
+    /**
+     * 处理产品名
+     *
+     * @param list
+     * @throws Exception
+     */
+    private List<Dto> dealProductName(List<Dto> list) throws Exception {
+        //处理产品名
+        if (list.size() > 0) {
+            for (Dto dto : list) {
+                List<KeyValue> keyValues = hbaseService.getByRowkeyColumn("product_dic", dto.getAsString("product_key"), "info:product_name,info:app_platform");
+                if (keyValues != null && keyValues.size() > 0) {
+                    for (KeyValue keyValue : keyValues) {
+                        dto.put("product_name", Bytes.toString(keyValue.getValue()).replaceAll("\"", ""));
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+
+    /**
+     * 求两个字符串以逗号分隔后字符数组的交集
+     *
+     * @param str1
+     * @param str2
+     * @return
+     * @throws Exception
+     */
+    private String intersectionStr(String str1, String str2) throws Exception {
+        String[] array1 = str1.split(",");
+        String[] array2 = str2.split(",");
+        
+        return intersectionStrArray(array1, array2);
+    }
+
+    private String intersectionStrArray(String[] array1, String[] array2) throws Exception {
+        List<String> list1 = Arrays.asList(array1);
+        List<String> list2 = Arrays.asList(array2);
+        StringBuilder sb = new StringBuilder();
+        for (String str : list1) {
+            if (list2.contains(str)) {
+                sb.append(str).append(",");
+            }
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
 
     /**
      * @param date
@@ -116,159 +265,5 @@ public class AppdataServiceImpl implements IAppdataService {
             }
         }
         return dtos;
-    }
-
-    public List<Dto> getProductSummaryData(boolean distinguishPlatform, String days, String products) throws Exception {
-        String[] dayArray = days.split(",");
-
-        String productAll = "yy_gjj,yy_jz,yy_chexian,yy_ss,jz_new";
-        if (StringUtils.isEmpty(products)) {
-            products = productAll;
-        } else {
-            products = intersectionStr(products, productAll);
-        }
-
-        String dataTypes = "new_user,active_user,start_times";
-        String tableName = "app_data_daily";
-
-        //平台
-        String platform = "全平台";
-
-        //截止到昨天的总数
-        String totalType = "total_user";
-
-        List<Dto> list = new ArrayList<Dto>();
-        for (String day : dayArray) {
-            List<Dto> dayList = getProductByDate(DateUtil.parseString2Date(day), products, dataTypes, tableName);
-            dealDayList(dayList, list, distinguishPlatform, platform, day);
-        }
-
-        //处理产品名
-        dealProductName(list);
-
-        return list;
-    }
-
-    /**
-     * 求两个字符串的交集
-     *
-     * @param products
-     * @param productAll
-     * @return
-     * @throws Exception
-     */
-    private String intersectionStr(String products, String productAll) throws Exception {
-        List<String> array = Arrays.asList(products.split(","));
-        List<String> allArray = Arrays.asList(productAll.split(","));
-        StringBuilder sb = new StringBuilder();
-        for (String product : array) {
-            if (allArray.contains(product)) {
-                sb.append(product).append(",");
-            }
-        }
-        return sb.substring(0, sb.length() - 1);
-    }
-
-    /**
-     * 查询当天以前的总数
-     *
-     * @param day
-     * @param distinguishPlatform
-     * @return
-     * @throws Exception
-     */
-    public List<Dto> getProductsTotalData(boolean distinguishPlatform, String day) throws Exception {
-        Date date = DateUtil.parseString2Date(day);
-        String products = "yy_gjj,yy_jz,yy_chexian,yy_ss,jz_new";
-        String totalType = "total_user";
-        String tableName = "app_data_daily";
-        List<Dto> totalList = getProductByDate(date, products, totalType, tableName);
-
-        List<Dto> list = new ArrayList<Dto>();
-
-        if (totalList.size() > 0) {
-            for (Dto dto : totalList) {
-                addTotal(list, dto, checkTotalDto(list, dto, distinguishPlatform), distinguishPlatform);
-            }
-        }
-
-        return list;
-    }
-
-    private void addTotal(List<Dto> list, Dto dto, boolean b, boolean distinguishPlatform) throws Exception {
-        if (!b) {
-            Dto dto1 = new BaseDto();
-            dto1.put("product_key", dto.getAsString("key").split("#")[0]);
-            dto1.put("total", dto.getAsLong("value"));
-            dto1.put("platform", PlatformDict.getPlatformName(dto.getAsString("key").split("#")[3]));
-            dto1.put("app_name", PlatformDict.getAppName(dto.getAsString("key").split("#")[3]));
-            list.add(dto1);
-        }
-
-    }
-
-    private boolean checkTotalDto(List<Dto> list, Dto dto, boolean distinguishPlatform) throws Exception {
-        if (list.size() == 0) {
-            return false;
-        }
-        for (Dto dto1 : list) {
-            if (dto.getAsString("key").split("#")[0].equals(dto1.getAsString("product_key"))) {
-                if (distinguishPlatform) {
-                    if (PlatformDict.getPlatformName(dto.getAsString("key").split("#")[3]).equals(dto1.getAsString("platform"))) {
-                        dto1.put("total", dto1.getAsLong("total") + dto.getAsLong("value"));
-                        return true;
-                    }
-                } else {
-                    dto1.put("total", dto1.getAsLong("total") + dto.getAsLong("value"));
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * 处理产品名
-     *
-     * @param list
-     * @throws Exception
-     */
-    private void dealProductName(List<Dto> list) throws Exception {
-        //处理产品名
-        if (list.size() > 0) {
-            for (Dto dto : list) {
-                List<KeyValue> keyValues = hbaseService.getByRowkeyColumn("product_dic", dto.getAsString("product_key"), "info:product_name,info:app_platform");
-                if (keyValues != null && keyValues.size() > 0) {
-                    for (KeyValue keyValue : keyValues) {
-                        dto.put("product_name", Bytes.toString(keyValue.getValue()).replaceAll("\"", ""));
-                    }
-                }
-            }
-        }
-    }
-
-    private void dealDayList(List<Dto> dayList, List<Dto> list, boolean distinguishPlatform, String platform, String day) throws Exception {
-        if (dayList.size() > 0) {
-            for (Dto dto : dayList) {
-                String productKey = dto.getAsString("key").split("#")[0];
-                String pkg = dto.getAsString("key").split("#")[3];
-
-                Dto dtoByProductKey = checkDto(getDtoByProductKey(list, productKey, pkg, distinguishPlatform, day), productKey, platform, list, pkg, distinguishPlatform, day);
-                List<String> keys = Arrays.asList(dto.getAsString("key").split("#"));
-
-                //处理新增用户
-                if (keys.contains("new_user")) {
-                    dtoByProductKey.put("new_user", dtoByProductKey.getAsLong("new_user") + dto.getAsLong("value"));
-                }
-                //处理活跃用户
-                if (keys.contains("active_user")) {
-                    dtoByProductKey.put("active_user", dtoByProductKey.getAsLong("active_user") + dto.getAsLong("value"));
-                }
-                //处理启动次数
-                if (keys.contains("start_times")) {
-                    dtoByProductKey.put("start_times", dtoByProductKey.getAsLong("start_times") + dto.getAsLong("value"));
-                }
-            }
-        }
     }
 }

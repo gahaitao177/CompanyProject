@@ -10,17 +10,18 @@ import java.util.List;
 public interface IAppdataService {
     /**
      * @param distinguishPlatform
-     * @param days
+     * @param dateList
      * @return
      * @throws Exception
      */
-    List<Dto> getProductSummaryData(boolean distinguishPlatform, String days, String products) throws Exception;
+    List<Dto> getProductSummaryData(boolean distinguishPlatform, String dateList, String products) throws Exception;
 
     /**
      * @param distinguishPlatform
-     * @param day
+     * @param date
+     * @param products
      * @return
      * @throws Exception
      */
-    List<Dto> getProductsTotalData(boolean distinguishPlatform, String day) throws Exception;
+    List<Dto> getProductsTotalData(boolean distinguishPlatform, String date, String products) throws Exception;
 }
